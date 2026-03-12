@@ -52,6 +52,8 @@ class RankedIssue:
 def compute_ranked_order(issues: list[IssueRecord], settings: Settings) -> list[RankedIssue]:
     annotated = [(issue, _bucket_for(issue, settings)) for issue in issues]
 
+    # Each band is sorted independently, then concatenated to match the PRD's
+    # fixed Rank 1 -> Rank 2 -> Rank 3 precedence.
     rank_1 = [issue for issue, bucket in annotated if bucket == RankBucket.RANK_1]
     rank_2 = [issue for issue, bucket in annotated if bucket == RankBucket.RANK_2]
     rank_3 = [issue for issue, bucket in annotated if bucket == RankBucket.RANK_3]
@@ -103,6 +105,8 @@ def _sort_rank_2(issues: list[IssueRecord]) -> list[IssueRecord]:
     enhancement_without_epic = [issue for issue in issues if _canonical_issue_type(issue.issue_type) == "enhancement" and not issue.epic_key]
     task_without_epic = [issue for issue in issues if _canonical_issue_type(issue.issue_type) == "task" and not issue.epic_key]
 
+    # Rank 2 keeps epic-linked work and standalone enhancements in the primary
+    # band, with non-epic tasks intentionally trailing that band.
     return (
         _sort_rank_2_primary(epic_issues, enhancement_without_epic)
         + _sort_by_priority_then_stable(task_without_epic)
@@ -113,6 +117,8 @@ def _sort_rank_2_primary(epic_issues: list[IssueRecord], enhancement_without_epi
     units: list[tuple[int, list[IssueRecord]]] = []
     seen_epics: set[str] = set()
 
+    # Walk the original board order so epic groups keep their first-seen position
+    # relative to standalone enhancements.
     combined = sorted(
         epic_issues + enhancement_without_epic,
         key=lambda issue: issue.original_index,

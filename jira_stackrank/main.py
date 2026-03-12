@@ -138,6 +138,8 @@ def build_move_plan(ranked: list[RankedIssue]) -> list[MovePlan]:
     if current_order == target_order:
         return []
 
+    # Keep the longest already-correct subsequence fixed so Jira rank updates only
+    # move the minimum set of issues needed to reach the target order.
     keep_in_place = _longest_increasing_target_subsequence(current_order, target_order)
     working_order = current_order[:]
     moves: list[MovePlan] = []
@@ -149,6 +151,8 @@ def build_move_plan(ranked: list[RankedIssue]) -> list[MovePlan]:
         current_index = working_order.index(issue_key)
 
         if index == 0:
+            # Jira supports placing an issue before a known anchor, so handle the
+            # head-of-list case explicitly instead of trying to invent a predecessor.
             before_issue_key = target_order[1]
             if current_index + 1 < len(working_order) and working_order[current_index + 1] == before_issue_key:
                 continue
@@ -180,6 +184,8 @@ def _longest_increasing_target_subsequence(current_order: list[str], target_orde
     if not sequence:
         return set()
 
+    # Standard patience-sorting LIS bookkeeping: tails stores the smallest ending
+    # value for each subsequence length, and previous lets us reconstruct the path.
     tails: list[int] = []
     tails_indices: list[int] = []
     previous: list[int] = [-1] * len(sequence)

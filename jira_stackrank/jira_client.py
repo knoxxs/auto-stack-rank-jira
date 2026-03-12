@@ -49,6 +49,8 @@ class JiraClient:
             raise JiraClientError("Unexpected Jira field discovery response.")
 
         def find_field_id(*names: str) -> str | None:
+            # Jira custom field IDs vary between sites, so resolve them by display
+            # name once and reuse the discovered IDs for later requests.
             lookup = {name.casefold() for name in names}
             for field in fields:
                 field_name = str(field.get("name", "")).casefold()
@@ -124,6 +126,8 @@ class JiraClient:
         issues: list[IssueRecord] = []
         start_at = 0
         while True:
+            # Sprint issues are paginated and must be fetched from the board sprint
+            # endpoint to preserve the board-scoped ordering Jira shows in the UI.
             payload = self._request_json(
                 "GET",
                 f"/rest/agile/1.0/board/{self._settings.board_id}/sprint/{sprint_id}/issue",
@@ -152,6 +156,8 @@ class JiraClient:
 
         epic_keys = {issue.epic_key for issue in issues if issue.epic_key}
         client_bug_keys = self._search_issue_keys(self._settings.client_bug_jql)
+        # The sprint payload does not directly tell us whether a bug matches the
+        # client-production criteria, so annotate from a separate JQL search.
         issues = [replace(issue, is_client_bug=issue.key in client_bug_keys) for issue in issues]
 
         if not epic_keys:
@@ -233,6 +239,8 @@ class JiraClient:
         next_page_token: str | None = None
 
         while True:
+            # Jira's newer search endpoint uses an opaque nextPageToken rather than
+            # numeric offsets, so loop until the server stops returning a token.
             body: dict[str, Any] = {
                 "jql": jql,
                 "fields": fields,
