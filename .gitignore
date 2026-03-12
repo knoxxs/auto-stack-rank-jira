@@ -4,4 +4,3 @@ __pycache__/
 *.pyc
 .idea/
 .pytest_cache/
-logs/
