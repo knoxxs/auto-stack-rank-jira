@@ -21,6 +21,28 @@ def settings() -> Settings:
 
 
 class JiraClientTests(unittest.TestCase):
+    def test_discover_fields_returns_expected_ids_when_unique(self) -> None:
+        client = JiraClient(settings())
+
+        with patch.object(
+            client,
+            "_request_json",
+            return_value=[
+                {"id": "customfield_rank", "name": "Rank"},
+                {"id": "customfield_epic", "name": "Epic Link"},
+                {"id": "customfield_pod", "name": "Pod"},
+                {"id": "customfield_env", "name": "Found in Environment"},
+                {"id": "customfield_client", "name": "Client"},
+            ],
+        ):
+            field_map = client.discover_fields()
+
+        self.assertEqual("customfield_rank", field_map.rank_field_id)
+        self.assertEqual("customfield_epic", field_map.epic_link_field_id)
+        self.assertEqual("customfield_pod", field_map.pod_field_id)
+        self.assertEqual("customfield_env", field_map.found_in_environment_field_id)
+        self.assertEqual("customfield_client", field_map.client_field_id)
+
     def test_discover_fields_rejects_duplicate_custom_field_names(self) -> None:
         client = JiraClient(settings())
 
@@ -60,6 +82,38 @@ class JiraClientTests(unittest.TestCase):
         self.assertEqual("Sprint 27", sprint.sprint_name)
         self.assertIn("Multiple active sprints found", captured.output[0])
         self.assertIn("(27)", captured.output[0])
+
+    def test_get_active_sprint_without_parallel_sprints_emits_no_warning(self) -> None:
+        client = JiraClient(settings())
+
+        with patch.object(
+            client,
+            "_request_json",
+            return_value={"values": [{"id": 12, "name": "Sprint 12"}]},
+        ):
+            with patch.object(LOGGER, "warning") as warning_mock:
+                sprint = client.get_active_sprint()
+
+        self.assertIsNotNone(sprint)
+        assert sprint is not None
+        self.assertEqual(12, sprint.sprint_id)
+        warning_mock.assert_not_called()
+
+    def test_search_issues_follows_next_page_tokens(self) -> None:
+        client = JiraClient(settings())
+
+        with patch.object(
+            client,
+            "_request_json",
+            side_effect=[
+                {"issues": [{"key": "A"}], "nextPageToken": "token-1"},
+                {"issues": [{"key": "B"}], "nextPageToken": None},
+            ],
+        ) as request_mock:
+            issues = client._search_issues("project = TEST", ["summary"], 50)
+
+        self.assertEqual([{"key": "A"}, {"key": "B"}], issues)
+        self.assertEqual("token-1", request_mock.call_args_list[1].kwargs["body"]["nextPageToken"])
 
     def test_request_json_uses_configured_timeout(self) -> None:
         client = JiraClient(settings())

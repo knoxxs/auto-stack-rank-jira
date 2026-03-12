@@ -46,6 +46,22 @@ def issue(
 
 
 class ComputeRankedOrderTests(unittest.TestCase):
+    def test_vulnerability_is_treated_as_rank_1_client_bug(self) -> None:
+        issues = [issue("BUG-1", "Vulnerability", 0, 2, None)]
+
+        ranked = compute_ranked_order(issues, settings())
+
+        self.assertEqual("Client Bug", ranked[0].kind)
+        self.assertEqual("Rank 1", ranked[0].rank_bucket.value)
+
+    def test_regular_bug_stays_in_rank_3(self) -> None:
+        issues = [issue("BUG-1", "Bug", 0, 2, None)]
+
+        ranked = compute_ranked_order(issues, settings())
+
+        self.assertEqual("Internal Bug", ranked[0].kind)
+        self.assertEqual("Rank 3", ranked[0].rank_bucket.value)
+
     def test_kind_marks_epic_items_for_tasks_and_enhancements(self) -> None:
         issues = [
             issue("ENH-1", "Enhancement", 0, 2, "EPIC-A", "Customer onboarding"),
