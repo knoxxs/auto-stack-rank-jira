@@ -27,60 +27,20 @@ class MovePlan:
 
 def main() -> int:
     configure_logging()
-    parser = argparse.ArgumentParser(description="Deterministically reorder Jira sprint issues.")
-    parser.add_argument("--apply", action="store_true", help="Apply Jira rank changes.")
-    parser.add_argument(
-        "--confirm-each",
-        action="store_true",
-        help="Prompt before each rank change while applying updates.",
-    )
-    args = parser.parse_args()
+    args = parse_args()
 
     try:
         settings = load_settings()
         client = JiraClient(settings)
-        LOGGER.info("Using Jira base URL: %s", settings.jira_base_url)
-        board = client.get_board_info()
-        LOGGER.info(
-            "Using board: %s (%s, type=%s)",
-            board.board_name or "<unnamed>",
-            board.board_id,
-            board.board_type or "<unknown>",
-        )
-        field_map = client.discover_fields()
-        priority_order = client.get_priority_order()
-        sprint = client.get_active_sprint()
+        sprint = log_runtime_context(client, settings)
         if sprint is None:
             LOGGER.info("No active sprint found.")
             return 0
-        LOGGER.info("Selected active sprint: %s (%s)", sprint.sprint_name or "<unnamed>", sprint.sprint_id)
 
-        issues = client.get_active_sprint_issues(
-            sprint_id=sprint.sprint_id,
-            field_map=field_map,
-            priority_order=priority_order,
-        )
-        LOGGER.info("Fetched %s issues from board %s sprint %s.", len(issues), settings.board_id, sprint.sprint_id)
-        LOGGER.info("Fetched issue type counts: %s", format_issue_type_counts(issues))
-        skipped_subtasks = [issue for issue in issues if is_subtask(issue.issue_type, issue.labels, settings)]
-        if skipped_subtasks:
-            LOGGER.info("Ignoring %s sub-task issues.", len(skipped_subtasks))
-        issues = [issue for issue in issues if not is_subtask(issue.issue_type, issue.labels, settings)]
-        issues = [replace(issue, original_index=index) for index, issue in enumerate(issues)]
-        LOGGER.info("Ranking %s non-sub-task issues.", len(issues))
-        unsupported = [
-            f"{issue.key} ({issue.issue_type})"
-            for issue in issues
-            if _canonical_issue_type(issue.issue_type) not in {"bug", "task", "enhancement"}
-        ]
-        if unsupported:
-            LOGGER.warning("Unsupported issue types returned by Jira: %s", ", ".join(unsupported))
+        issues = fetch_rankable_issues(client, settings, sprint.sprint_id)
         ranked = compute_ranked_order(issues, settings)
         moves = build_move_plan(ranked)
-
-        log_dry_run_table(ranked, settings)
-        LOGGER.info("Total issues: %s", len(ranked))
-        LOGGER.info("Moves required: %s", len(moves))
+        log_rank_preview(ranked, moves, settings)
 
         if not moves:
             LOGGER.info("No reordering required.")
@@ -103,6 +63,70 @@ def main() -> int:
     except (ConfigError, JiraClientError, RankingError) as exc:
         LOGGER.error(str(exc))
         return 1
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Deterministically reorder Jira sprint issues.")
+    parser.add_argument("--apply", action="store_true", help="Apply Jira rank changes.")
+    parser.add_argument(
+        "--confirm-each",
+        action="store_true",
+        help="Prompt before each rank change while applying updates.",
+    )
+    return parser.parse_args()
+
+
+def log_runtime_context(client: JiraClient, settings: Settings):
+    LOGGER.info("Using Jira base URL: %s", settings.jira_base_url)
+    board = client.get_board_info()
+    LOGGER.info(
+        "Using board: %s (%s, type=%s)",
+        board.board_name or "<unnamed>",
+        board.board_id,
+        board.board_type or "<unknown>",
+    )
+    sprint = client.get_active_sprint()
+    if sprint is not None:
+        LOGGER.info("Selected active sprint: %s (%s)", sprint.sprint_name or "<unnamed>", sprint.sprint_id)
+    return sprint
+
+
+def fetch_rankable_issues(client: JiraClient, settings: Settings, sprint_id: int):
+    field_map = client.discover_fields()
+    priority_order = client.get_priority_order()
+    fetched_issues = client.get_active_sprint_issues(
+        sprint_id=sprint_id,
+        field_map=field_map,
+        priority_order=priority_order,
+    )
+    LOGGER.info("Fetched %s issues from board %s sprint %s.", len(fetched_issues), settings.board_id, sprint_id)
+    LOGGER.info("Fetched issue type counts: %s", format_issue_type_counts(fetched_issues))
+
+    rankable_issues = [issue for issue in fetched_issues if not is_subtask(issue.issue_type, issue.labels, settings)]
+    skipped_count = len(fetched_issues) - len(rankable_issues)
+    if skipped_count:
+        LOGGER.info("Ignoring %s sub-task issues.", skipped_count)
+
+    rankable_issues = [replace(issue, original_index=index) for index, issue in enumerate(rankable_issues)]
+    LOGGER.info("Ranking %s non-sub-task issues.", len(rankable_issues))
+    log_unsupported_issue_types(rankable_issues)
+    return rankable_issues
+
+
+def log_unsupported_issue_types(issues: list[object]) -> None:
+    unsupported = [
+        f"{getattr(issue, 'key', '<unknown>')} ({getattr(issue, 'issue_type', '<unknown>')})"
+        for issue in issues
+        if _canonical_issue_type(getattr(issue, "issue_type", None)) not in {"bug", "task", "enhancement"}
+    ]
+    if unsupported:
+        LOGGER.warning("Unsupported issue types returned by Jira: %s", ", ".join(unsupported))
+
+
+def log_rank_preview(ranked: list[RankedIssue], moves: list[MovePlan], settings: Settings) -> None:
+    log_dry_run_table(ranked, settings)
+    LOGGER.info("Total issues: %s", len(ranked))
+    LOGGER.info("Moves required: %s", len(moves))
 
 
 def configure_logging() -> Path:

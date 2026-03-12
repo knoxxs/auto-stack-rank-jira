@@ -54,15 +54,12 @@ def compute_ranked_order(issues: list[IssueRecord], settings: Settings) -> list[
 
     # Each band is sorted independently, then concatenated to match the PRD's
     # fixed Rank 1 -> Rank 2 -> Rank 3 precedence.
-    rank_1 = [issue for issue, bucket in annotated if bucket == RankBucket.RANK_1]
-    rank_2 = [issue for issue, bucket in annotated if bucket == RankBucket.RANK_2]
-    rank_3 = [issue for issue, bucket in annotated if bucket == RankBucket.RANK_3]
-
-    rank_1_sorted = _sort_by_priority_then_stable(rank_1)
-    rank_2_sorted = _sort_rank_2(rank_2)
-    rank_3_sorted = _sort_by_priority_then_stable(rank_3)
-
-    final = rank_1_sorted + rank_2_sorted + rank_3_sorted
+    rank_groups = _partition_by_bucket(annotated)
+    final = (
+        _sort_by_priority_then_stable(rank_groups[RankBucket.RANK_1])
+        + _sort_rank_2(rank_groups[RankBucket.RANK_2])
+        + _sort_by_priority_then_stable(rank_groups[RankBucket.RANK_3])
+    )
     positions = {issue.key: index + 1 for index, issue in enumerate(final)}
     buckets = {issue.key: bucket for issue, bucket in annotated}
 
@@ -83,6 +80,7 @@ def compute_ranked_order(issues: list[IssueRecord], settings: Settings) -> list[
 
 
 def _bucket_for(issue: IssueRecord, settings: Settings) -> RankBucket:
+    del settings
     raw_issue_type = _normalize(issue.issue_type)
     issue_type = _canonical_issue_type(issue.issue_type)
 
@@ -100,10 +98,32 @@ def _bucket_for(issue: IssueRecord, settings: Settings) -> RankBucket:
     return RankBucket.RANK_2
 
 
+def _partition_by_bucket(
+    annotated: list[tuple[IssueRecord, RankBucket]]
+) -> dict[RankBucket, list[IssueRecord]]:
+    grouped: dict[RankBucket, list[IssueRecord]] = {
+        RankBucket.RANK_1: [],
+        RankBucket.RANK_2: [],
+        RankBucket.RANK_3: [],
+    }
+    for issue, bucket in annotated:
+        grouped[bucket].append(issue)
+    return grouped
+
+
 def _sort_rank_2(issues: list[IssueRecord]) -> list[IssueRecord]:
-    epic_issues = [issue for issue in issues if issue.epic_key]
-    enhancement_without_epic = [issue for issue in issues if _canonical_issue_type(issue.issue_type) == "enhancement" and not issue.epic_key]
-    task_without_epic = [issue for issue in issues if _canonical_issue_type(issue.issue_type) == "task" and not issue.epic_key]
+    epic_issues: list[IssueRecord] = []
+    enhancement_without_epic: list[IssueRecord] = []
+    task_without_epic: list[IssueRecord] = []
+
+    for issue in issues:
+        issue_type = _canonical_issue_type(issue.issue_type)
+        if issue.epic_key:
+            epic_issues.append(issue)
+        elif issue_type == "enhancement":
+            enhancement_without_epic.append(issue)
+        else:
+            task_without_epic.append(issue)
 
     # Rank 2 keeps epic-linked work and standalone enhancements in the primary
     # band, with non-epic tasks intentionally trailing that band.
@@ -138,20 +158,6 @@ def _sort_rank_2_primary(epic_issues: list[IssueRecord], enhancement_without_epi
         units.append((min(member.original_index for member in members), _sort_by_priority_then_stable(members)))
 
     return [member for _, unit in sorted(units, key=lambda item: item[0]) for member in unit]
-
-
-def _sort_epic_groups(issues: list[IssueRecord]) -> list[IssueRecord]:
-    groups = _group_epic_members(issues)
-
-    group_order = sorted(
-        groups.items(),
-        key=lambda item: min(member.original_index for member in item[1]),
-    )
-
-    ordered: list[IssueRecord] = []
-    for _, members in group_order:
-        ordered.extend(_sort_by_priority_then_stable(members))
-    return ordered
 
 
 def _group_epic_members(issues: list[IssueRecord]) -> dict[str, list[IssueRecord]]:

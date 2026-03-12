@@ -53,22 +53,6 @@ class JiraClient:
         if not isinstance(fields, list):
             raise JiraClientError("Unexpected Jira field discovery response.")
 
-        def find_field_id(*names: str) -> str | None:
-            # Jira custom field IDs vary between sites, so resolve them by display
-            # name once and reuse the discovered IDs for later requests.
-            lookup = {name.casefold() for name in names}
-            matches: list[str] = []
-            for field in fields:
-                field_name = str(field.get("name", "")).casefold()
-                if field_name in lookup:
-                    matches.append(str(field.get("id")))
-            if len(matches) > 1:
-                raise JiraClientError(
-                    f"Multiple Jira fields matched {', '.join(names)}. "
-                    "Please make the field names unique in Jira before running this tool."
-                )
-            return matches[0] if matches else None
-
         rank_field_id = None
         for field in fields:
             if str(field.get("name", "")).casefold() == "rank":
@@ -77,10 +61,10 @@ class JiraClient:
 
         return FieldMap(
             rank_field_id=rank_field_id,
-            epic_link_field_id=find_field_id("Epic Link"),
-            pod_field_id=find_field_id("Pod"),
-            found_in_environment_field_id=find_field_id("Found in Environment"),
-            client_field_id=find_field_id("Client"),
+            epic_link_field_id=self._find_field_id(fields, "Epic Link"),
+            pod_field_id=self._find_field_id(fields, "Pod"),
+            found_in_environment_field_id=self._find_field_id(fields, "Found in Environment"),
+            client_field_id=self._find_field_id(fields, "Client"),
         )
 
     def get_board_info(self) -> BoardInfo:
@@ -108,84 +92,22 @@ class JiraClient:
 
     def get_active_sprint(self) -> SprintInfo | None:
         payload = self._request_json("GET", f"/rest/agile/1.0/board/{self._settings.board_id}/sprint", {"state": "active"})
-        values = payload.get("values", [])
-        if not values:
-            return None
-        active_sprints = [sprint for sprint in values if sprint.get("id") is not None]
+        active_sprints = [sprint for sprint in payload.get("values", []) if sprint.get("id") is not None]
         if not active_sprints:
             return None
-        sprint = max(active_sprints, key=lambda item: int(item["id"]))
-        if len(active_sprints) > 1:
-            chosen_name = str(sprint.get("name", ""))
-            chosen_id = int(sprint["id"])
-            LOGGER.warning(
-                f"Multiple active sprints found on board {self._settings.board_id}; "
-                f"using latest sprint {chosen_name or '<unnamed>'} ({chosen_id})."
-            )
-        sprint_id = sprint.get("id")
-        if sprint_id is None:
-            return None
+        sprint = max(active_sprints, key=self._sprint_sort_key)
+        self._log_parallel_sprint_choice(active_sprints, sprint)
         return SprintInfo(
-            sprint_id=int(sprint_id),
+            sprint_id=int(sprint["id"]),
             sprint_name=str(sprint.get("name", "")),
         )
 
     def get_active_sprint_issues(
         self, sprint_id: int, field_map: FieldMap, priority_order: dict[str, int]
     ) -> list[IssueRecord]:
-        requested_fields = ["issuetype", "priority", "status", "summary", "labels"]
-        for field_id in (
-            field_map.rank_field_id,
-            field_map.epic_link_field_id,
-            field_map.pod_field_id,
-            field_map.found_in_environment_field_id,
-            field_map.client_field_id,
-        ):
-            if field_id:
-                requested_fields.append(field_id)
-
-        issues: list[IssueRecord] = []
-        start_at = 0
-        while True:
-            # Sprint issues are paginated and must be fetched from the board sprint
-            # endpoint to preserve the board-scoped ordering Jira shows in the UI.
-            payload = self._request_json(
-                "GET",
-                f"/rest/agile/1.0/board/{self._settings.board_id}/sprint/{sprint_id}/issue",
-                {
-                    "startAt": start_at,
-                    "maxResults": 100,
-                    "fields": ",".join(requested_fields),
-                },
-            )
-
-            page_issues = payload.get("issues", [])
-            for offset, issue in enumerate(page_issues):
-                issues.append(
-                    self._to_issue_record(
-                        issue=issue,
-                        original_index=start_at + offset,
-                        field_map=field_map,
-                        priority_order=priority_order,
-                    )
-                )
-
-            total = int(payload.get("total", len(issues)))
-            start_at += len(page_issues)
-            if start_at >= total or not page_issues:
-                break
-
-        epic_keys = {issue.epic_key for issue in issues if issue.epic_key}
-        client_bug_keys = self._search_issue_keys(self._settings.client_bug_jql)
-        # The sprint payload does not directly tell us whether a bug matches the
-        # client-production criteria, so annotate from a separate JQL search.
-        issues = [replace(issue, is_client_bug=issue.key in client_bug_keys) for issue in issues]
-
-        if not epic_keys:
-            return issues
-
-        epic_summaries = self._get_issue_summaries(epic_keys)
-        return [replace(issue, epic_summary=epic_summaries.get(issue.epic_key)) for issue in issues]
+        issues = self._fetch_sprint_issues(sprint_id, field_map, priority_order)
+        issues = self._annotate_client_bugs(issues)
+        return self._annotate_epic_summaries(issues)
 
     def move_issue_after(self, issue_key: str, after_issue_key: str) -> None:
         self._request_json(
@@ -318,6 +240,99 @@ class JiraClient:
         if not content:
             return {}
         return json.loads(content)
+
+    def _find_field_id(self, fields: list[dict[str, Any]], *names: str) -> str | None:
+        # Jira custom field IDs vary between sites, so resolve them by display
+        # name once and reuse the discovered IDs for later requests.
+        lookup = {name.casefold() for name in names}
+        matches = [
+            str(field.get("id"))
+            for field in fields
+            if str(field.get("name", "")).casefold() in lookup
+        ]
+        if len(matches) > 1:
+            raise JiraClientError(
+                f"Multiple Jira fields matched {', '.join(names)}. "
+                "Please make the field names unique in Jira before running this tool."
+            )
+        return matches[0] if matches else None
+
+    def _sprint_sort_key(self, sprint: dict[str, Any]) -> int:
+        return int(sprint["id"])
+
+    def _log_parallel_sprint_choice(
+        self,
+        active_sprints: list[dict[str, Any]],
+        chosen_sprint: dict[str, Any],
+    ) -> None:
+        if len(active_sprints) <= 1:
+            return
+        chosen_name = str(chosen_sprint.get("name", ""))
+        chosen_id = int(chosen_sprint["id"])
+        LOGGER.warning(
+            f"Multiple active sprints found on board {self._settings.board_id}; "
+            f"using latest sprint {chosen_name or '<unnamed>'} ({chosen_id})."
+        )
+
+    def _fetch_sprint_issues(
+        self,
+        sprint_id: int,
+        field_map: FieldMap,
+        priority_order: dict[str, int],
+    ) -> list[IssueRecord]:
+        requested_fields = self._requested_issue_fields(field_map)
+        issues: list[IssueRecord] = []
+        start_at = 0
+
+        while True:
+            payload = self._request_json(
+                "GET",
+                f"/rest/agile/1.0/board/{self._settings.board_id}/sprint/{sprint_id}/issue",
+                {
+                    "startAt": start_at,
+                    "maxResults": 100,
+                    "fields": ",".join(requested_fields),
+                },
+            )
+            page_issues = payload.get("issues", [])
+            issues.extend(
+                self._to_issue_record(
+                    issue=issue,
+                    original_index=start_at + offset,
+                    field_map=field_map,
+                    priority_order=priority_order,
+                )
+                for offset, issue in enumerate(page_issues)
+            )
+
+            total = int(payload.get("total", len(issues)))
+            start_at += len(page_issues)
+            if start_at >= total or not page_issues:
+                return issues
+
+    def _requested_issue_fields(self, field_map: FieldMap) -> list[str]:
+        requested_fields = ["issuetype", "priority", "status", "summary", "labels"]
+        optional_fields = (
+            field_map.rank_field_id,
+            field_map.epic_link_field_id,
+            field_map.pod_field_id,
+            field_map.found_in_environment_field_id,
+            field_map.client_field_id,
+        )
+        requested_fields.extend(field_id for field_id in optional_fields if field_id)
+        return requested_fields
+
+    def _annotate_client_bugs(self, issues: list[IssueRecord]) -> list[IssueRecord]:
+        client_bug_keys = self._search_issue_keys(self._settings.client_bug_jql)
+        return [replace(issue, is_client_bug=issue.key in client_bug_keys) for issue in issues]
+
+    def _annotate_epic_summaries(self, issues: list[IssueRecord]) -> list[IssueRecord]:
+        epic_keys = {issue.epic_key for issue in issues if issue.epic_key}
+        if not epic_keys:
+            return issues
+
+        epic_summaries = self._get_issue_summaries(epic_keys)
+        return [replace(issue, epic_summary=epic_summaries.get(issue.epic_key)) for issue in issues]
 
 
 def _priority_rank(priority: dict[str, Any], priority_order: dict[str, int]) -> int:
