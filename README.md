@@ -33,6 +33,13 @@ jira_stackrank/
 tests/
   unit/              Focused unit tests
   integration/       End-to-end CLI flow tests with mocked Jira client
+
+docs/
+  prd.md             Original product requirements
+  ARCHITECTURE.md    Codebase walkthrough and data flow
+  OPERATIONS.md      Runbook for dry runs and apply mode
+  TESTING.md         Test strategy and conventions
+  CHANGELOG.md       Human-readable project history
 ```
 
 ## Setup
