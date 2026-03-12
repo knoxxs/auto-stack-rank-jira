@@ -9,6 +9,9 @@ from collections import Counter
 from dataclasses import dataclass, replace
 from datetime import datetime
 
+from jira_stackrank.cli_output import configure_logging as configure_rich_logging
+from jira_stackrank.cli_output import print_invalid_confirmation_response, print_rank_preview
+from jira_stackrank.cli_output import truncate_title
 from jira_stackrank.config import ConfigError, Settings, load_settings
 from jira_stackrank.jira_client import JiraClient, JiraClientError
 from jira_stackrank.ranking_engine import RankedIssue, RankingError, compute_ranked_order
@@ -124,7 +127,7 @@ def log_unsupported_issue_types(issues: list[object]) -> None:
 
 
 def log_rank_preview(ranked: list[RankedIssue], moves: list[MovePlan], settings: Settings) -> None:
-    log_dry_run_table(ranked, settings)
+    print_rank_preview(ranked, settings)
     LOGGER.info("Total issues: %s", len(ranked))
     LOGGER.info("Moves required: %s", len(moves))
 
@@ -134,19 +137,7 @@ def configure_logging() -> Path:
     log_directory.mkdir(parents=True, exist_ok=True)
     log_path = log_directory / f"{datetime.now().strftime('%Y-%m-%d %H-%M-%S')}.log"
 
-    formatter = logging.Formatter("%(message)s")
-    root_logger = logging.getLogger()
-    root_logger.setLevel(logging.INFO)
-    root_logger.handlers.clear()
-
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(formatter)
-    root_logger.addHandler(console_handler)
-
-    file_handler = logging.FileHandler(log_path, encoding="utf-8")
-    file_handler.setFormatter(formatter)
-    root_logger.addHandler(file_handler)
-
+    configure_rich_logging(log_path)
     LOGGER.info("Writing run log to %s", log_path)
     return log_path
 
@@ -235,47 +226,6 @@ def _longest_increasing_target_subsequence(current_order: list[str], target_orde
     return {target_order[index] for index in reversed(lis_indices)}
 
 
-def log_dry_run_table(ranked: list[RankedIssue], settings: Settings) -> None:
-    rows = sorted(ranked, key=lambda item: item.new_position)
-    headers = (
-        "Issue Key",
-        "Type",
-        "Kind",
-        "Title",
-        "Priority",
-        "Current Position",
-        "New Position",
-        "Current Rank Value",
-        "Rank Bucket",
-    )
-    data = [
-        (
-            row.key,
-            row.issue_type,
-            row.kind or "",
-            truncate_title(row.summary, settings),
-            row.priority_name or "",
-            str(row.current_position),
-            str(row.new_position),
-            row.current_rank_value or "",
-            row.rank_bucket.value,
-        )
-        for row in rows
-    ]
-    widths = [
-        max(len(header), *(len(record[column]) for record in data)) if data else len(header)
-        for column, header in enumerate(headers)
-    ]
-
-    def render(values: tuple[str, str, str, str, str, str, str, str, str]) -> str:
-        return " | ".join(value.ljust(widths[index]) for index, value in enumerate(values))
-
-    LOGGER.info(render(headers))
-    LOGGER.info("-+-".join("-" * width for width in widths))
-    for record in data:
-        LOGGER.info(render(record))
-
-
 def format_issue_type_counts(issues: list[object]) -> str:
     counts = Counter(getattr(issue, "issue_type", "<unknown>") for issue in issues)
     if not counts:
@@ -292,20 +242,12 @@ def confirm_move(move: MovePlan) -> bool:
             return True
         if response in {"", "n", "no", "q", "quit"}:
             return False
-        print("Please respond with 'y' to apply or 'n'/'q' to stop.")
+        print_invalid_confirmation_response()
 
 
 def is_subtask(issue_type: str, labels: tuple[str, ...], settings: Settings) -> bool:
     configured_issue_types = {value.casefold() for value in settings.subtask_issue_types}
     return issue_type.strip().casefold() in configured_issue_types
-
-
-def truncate_title(summary: str, settings: Settings) -> str:
-    limit = settings.title_truncation_limit
-    if len(summary) <= limit:
-        return summary
-    return f"{summary[: limit - 3]}..."
-
 
 if __name__ == "__main__":
     sys.exit(main())

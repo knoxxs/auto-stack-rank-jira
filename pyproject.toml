@@ -8,6 +8,7 @@ packages = [{ include = "jira_stackrank" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
+rich = "^14.3.3"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"
