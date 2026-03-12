@@ -1,0 +1,104 @@
+Writing run log to /Users/aapa/workspace/projects/personal/auto-stack-rank-ontic-jira/logs/2026-03-13 00-24-15.log
+Using Jira base URL: https://ontichelp.atlassian.net
+Using board: IICM (1124, type=scrum)
+Selected active sprint: Sprint 114 (1087)
+Fetched 212 issues from board 1124 sprint 1087.
+Fetched issue type counts: BE Sub-task=52, Bug=56, Bug Sub-task=2, Enhancements=21, FE Sub-task=41, QA Sub-task=25, Task=14, Vulnerability=1
+Ignoring 120 sub-task issues.
+Ranking 92 non-sub-task issues.
+Issue Key   | Type          | Kind             | Title                                | Priority | Current Position | New Position | Current Rank Value                | Rank Bucket
+------------+---------------+------------------+--------------------------------------+----------+------------------+--------------+-----------------------------------+------------
+ONT-38091   | Bug           | Client Bug       | Incident Created With Field Depen... | High     | 1                | 1            | 2|hzv4uu:qp                       | Rank 1     
+ONT-38095   | Bug           | Client Bug       | Dynamic Rule Did Not Run in NFL o... | High     | 2                | 2            | 2|hzv4uu:qq                       | Rank 1     
+ONT-38654   | Bug           | Client Bug       | [TAM]: TAM reports not getting do... | High     | 3                | 3            | 2|hzv4uu:qq9                      | Rank 1     
+ONT-35696   | Bug           | Client Bug       | Block | Incidents are visible in ... | High     | 4                | 4            | 2|hzv4uu:qqd                      | Rank 1     
+ONT-38089   | Bug           | Client Bug       | Short Answer Number Field That is... | High     | 5                | 5            | 2|hzv4uu:qqg                      | Rank 1     
+ONT-38614   | Bug           | Client Bug       | SRA metrics showing responses to ... | High     | 6                | 6            | 2|hzv4uu:qqh                      | Rank 1     
+ONT-38852   | Bug           | Client Bug       | GEA - Assessor Able to Initiate a... | High     | 7                | 7            | 2|hzv4uu:qqhi                     | Rank 1     
+ONT-39004   | Bug           | Client Bug       | FD#6072 intake form formatting no... | High     | 8                | 8            | 2|hzv4uu:qqhr                     | Rank 1     
+ONT-38592   | Bug           | Client Bug       | SRA responses are running off pag... | High     | 9                | 9            | 2|hzv4uu:qqhv                     | Rank 1     
+FEDRAMP-581 | Vulnerability | Client Bug       | Improper neutralization of specia... | High     | 10               | 10           | 2|hzv4uu:qqhx                     | Rank 1     
+ONT-38714   | Bug           | Client Bug       | FD#5994 can't associate entities ... | High     | 11               | 11           | 2|hzv4uu:qqhy                     | Rank 1     
+ONT-39209   | Bug           | Client Bug       | SRA - Audit History                  | High     | 12               | 12           | 2|hzv4uu:qqhz                     | Rank 1     
+ONT-39223   | Bug           | Client Bug       | Incident details card not coming ... | High     | 13               | 13           | 2|hzv4uu:qqhzi                    | Rank 1     
+ONT-39469   | Bug           | Client Bug       | FD#6063 Ontic refreshing when mul... | High     | 14               | 14           | 2|hzv4uu:qqhzr                    | Rank 1     
+ONT-39474   | Bug           | Client Bug       | FD#6139 investigation dashboard u... | High     | 15               | 15           | 2|hzv4uu:qqhzv                    | Rank 1     
+ONT-39476   | Bug           | Client Bug       | Custom fields saving issue in vul... | High     | 16               | 16           | 2|hzv4uu:qqhzx                    | Rank 1     
+ONT-39572   | Bug           | Client Bug       | SRA status discrepancy between mo... | High     | 17               | 17           | 2|hzv4uu:qqhzy                    | Rank 1     
+ONT-39632   | Bug           | Client Bug       | RMS reports are not displaying mu... | High     | 18               | 18           | 2|hzv4uu:qqhzz                    | Rank 1     
+ONT-37674   | Bug           | Client Bug       | Exported data for columns heading... | Medium   | 19               | 19           | 2|hzv4uu:qqzi                     | Rank 1     
+ONT-38885   | Bug           | Client Bug       | FD#6065 | Unable to crop/edit ima... | Medium   | 20               | 20           | 2|hzv4uu:qqzy                     | Rank 1     
+ONT-38920   | Bug           | Client Bug       | CLONE - FD #5456 - Associated Pri... | Medium   | 21               | 21           | 2|hzv4uu:qqzzi                    | Rank 1     
+ONT-38936   | Bug           | Client Bug       | FD#6000 | Unable to configure wid... | Medium   | 22               | 22           | 2|hzv4uu:qqzzr                    | Rank 1     
+ONT-30217   | Bug           | Client Bug       | FD 5087 - 90/120 day notification... | Medium   | 23               | 23           | 2|hzv4uu:qqzzv                    | Rank 1     
+ONT-35258   | Bug           | Client Bug       | Duplicate Values Appearing in Req... | Medium   | 24               | 24           | 2|hzv4uu:qqzzx                    | Rank 1     
+ONT-35872   | Bug           | Client Bug       | RMS Conversations Not Displaying ... | Medium   | 25               | 25           | 2|hzv4uu:qqzzy                    | Rank 1     
+ONT-37195   | Bug           | Client Bug       | FD# 5712: Incidents and Events Da... | Medium   | 26               | 26           | 2|hzv4uu:qqzzz                    | Rank 1     
+ONT-37307   | Bug           | Client Bug       | FD #5741 - When editing Metrics, ... | Medium   | 27               | 27           | 2|hzv4uu:qqzzzi                   | Rank 1     
+ONT-38861   | Bug           | Client Bug       | FD#6066 investigate why large ema... | Medium   | 28               | 28           | 2|hzv4uu:qqzzzr                   | Rank 1     
+ONT-39222   | Bug           | Client Bug       | pasting into Question Library sea... | Medium   | 29               | 29           | 2|hzv4uu:qqzzzv                   | Rank 1     
+ONT-39372   | Bug           | Client Bug       | Marking any question or remark re... | Medium   | 30               | 30           | 2|hzv4uu:qqzzzx                   | Rank 1     
+ONT-39406   | Bug           | Client Bug       | FD#6149 | Dispatch Availability f... | Medium   | 31               | 31           | 2|hzv4uu:qqzzzy                   | Rank 1     
+ONT-39428   | Bug           | Client Bug       | FD# 6131- Unable to see line tren... | Medium   | 32               | 32           | 2|hzv4uu:qqzzzz                   | Rank 1     
+ONT-39507   | Bug           | Client Bug       | Incorrect labels are showing up i... | Medium   | 33               | 33           | 2|hzv4uu:qqzzzzi                  | Rank 1     
+ONT-35504   | Bug           | Client Bug       | Unable to plot primary subject in... | Low      | 34               | 34           | 2|hzv4uu:qqzzzzr                  | Rank 1     
+ONT-36310   | Enhancements  |                  | FD#5538 || User able to see task ... | Critical | 35               | 35           | 2|hzv4v2:y0co                     | Rank 2     
+ONT-25508   | Enhancements  |                  | Ability to export connection data... | High     | 36               | 36           | 2|hzv4v2:y1zzzssj                 | Rank 2     
+ONT-24709   | Enhancements  | Apple Launch Epi | Ability to send alert to warn abo... | High     | 37               | 37           | 2|hzv4v2:y1zzzssjx                | Rank 2     
+ONT-24566   | Enhancements  | Dispatch UX Impr | Stanford Metrics -- Allow the Abi... | Critical | 38               | 38           | 2|hzv4v2:y1zzzssjxi               | Rank 2     
+ONT-37784   | Enhancements  | Dispatch UX Impr | Add Dashboard Configuration Abili... | High     | 39               | 39           | 2|hzv4v2:y1zzzssjy                | Rank 2     
+ONT-36237   | Enhancements  | Dispatch UX Impr | Ability To Notify Assignee of Dis... | High     | 41               | 40           | 2|hzv4v2:y3wur                    | Rank 2     
+ONT-36236   | Enhancements  | Dispatch UX Impr | Ability to Create Dispatch From S... | High     | 42               | 41           | 2|hzv4v2:y9                       | Rank 2     
+ONT-36234   | Enhancements  | Dispatch UX Impr | Clone Dispatch with ability to As... | High     | 43               | 42           | 2|hzv4v2:yc                       | Rank 2     
+ONT-25149   | Enhancements  | Dispatch UX Impr | Ability to visualize breaches for... | High     | 44               | 43           | 2|hzv4v2:yd                       | Rank 2     
+ONT-39135   | Enhancements  | Dispatch UX Impr | Update Standard CTA for Escalate ... | High     | 45               | 44           | 2|hzv78u:zzzzzzzzzzzzzzjdanz3ihzv | Rank 2     
+ONT-38794   | Enhancements  | Dispatch UX Impr | Update automation syncing Tags to... | Medium   | 78               | 45           | 2|i050qf:                         | Rank 2     
+ONT-36621   | Enhancements  |                  | Dispatch: Import Stanford Health'... | High     | 40               | 46           | 2|hzv4v2:y1zzzssk                 | Rank 2     
+ONT-38865   | Enhancements  | Phase 2: AI Summ | Include Custom Fields in Summaries   | Critical | 46               | 47           | 2|i045f6:i                        | Rank 2     
+ONT-38986   | Enhancements  | Phase 2: AI Summ | “Summary of summaries” pipeline      | Critical | 47               | 48           | 2|i045f6:r                        | Rank 2     
+ONT-38989   | Enhancements  | Phase 2: AI Summ | Apply field length exclusion auto... | Critical | 48               | 49           | 2|i045f6:v                        | Rank 2     
+ONT-38990   | Enhancements  | Phase 2: AI Summ | Responsive Layout for Summarization  | High     | 49               | 50           | 2|i045f6:x                        | Rank 2     
+ONT-38991   | Enhancements  | Phase 2: AI Summ | Persistence and Caching of Genera... | High     | 50               | 51           | 2|i045f6:y                        | Rank 2     
+ONT-38992   | Enhancements  | Phase 2: AI Summ | Consumption Tracking and Data Ins... | High     | 51               | 52           | 2|i045f6:z                        | Rank 2     
+ONT-39282   | Task          | Phase 2: AI Summ | [BE] Deploy Case Summarisation fo... | High     | 53               | 53           | 2|i045f6:zl                       | Rank 2     
+ONT-38994   | Enhancements  | Phase 2: AI Summ | Role Based Governance for Field A... | Medium   | 52               | 54           | 2|i045f6:zi                       | Rank 2     
+ONT-37308   | Enhancements  |                  | Enable Cross-Asset Filtering & "B... | Critical | 54               | 55           | 2|i045f6:zo                       | Rank 2     
+ONT-38474   | Task          | Connected Analyt | Connected Analytics/PGSQL Query f... | High     | 55               | 56           | 2|i045f6:zr                       | Rank 2     
+ONT-39307   | Task          | Connected Analyt | Deploy Cross Assets to Apple's de... | High     | 83               | 57           | 2|i054dz:                         | Rank 2     
+ONT-37539   | Task          | Pendo Refresh fo | Pendo integration in Dispatch        | Medium   | 56               | 58           | 2|i045f6:zti                      | Rank 2     
+ONT-37540   | Task          | Pendo Refresh fo | RMS Creation                         | Medium   | 60               | 59           | 2|i045f6:zz                       | Rank 2     
+ONT-37541   | Task          | Pendo Refresh fo | Task Creation                        | Medium   | 61               | 60           | 2|i045f6:zzi                      | Rank 2     
+ONT-37816   | Task          | Pendo Refresh fo | SRA Creation                         | Medium   | 62               | 61           | 2|i045f6:zzr                      | Rank 2     
+ONT-38508   | Task          | Pendo Refresh fo | SRA Workflow                         | Medium   | 63               | 62           | 2|i045f6:zzt                      | Rank 2     
+ONT-38407   | Task          | Project Infinity | [IICM POD]- cross pod testing dep... | High     | 57               | 63           | 2|i045f6:zu                       | Rank 2     
+ONT-39338   | Enhancements  |                  | Enable Vulnerability Creation & L... | Critical | 84               | 64           | 2|i054mn:                         | Rank 2     
+ONT-34776   | Task          |                  | Automated UT & IT generation         | Critical | 59               | 65           | 2|i045f6:zy                       | Rank 2     
+ONT-37437   | Task          |                  | CustomAsset Label is coming as Id... | High     | 58               | 66           | 2|i045f6:zv                       | Rank 2     
+ONT-38290   | Task          |                  | Sentry Dashboard - IICM Configura... | Medium   | 64               | 67           | 2|i045f6:zzv                      | Rank 2     
+ONT-38331   | Task          |                  | Co-Pilot and IICM Agent workflow     | Medium   | 65               | 68           | 2|i045f6:zzx                      | Rank 2     
+ONT-38966   | Task          |                  | Sentry Dashboard - Link Preview C... | Medium   | 82               | 69           | 2|i0522v:                         | Rank 2     
+ONT-39600   | Bug           | Internal Bug     | [AUTOPREPROD] unable to navigate ... | Critical | 90               | 70           | 2|i056in:                         | Rank 3     
+ONT-39602   | Bug           | Internal Bug     | Add transaction/add property butt... | Critical | 91               | 71           | 2|i056j3:                         | Rank 3     
+ONT-38765   | Bug           | Internal Bug     | Stage | Dispatch Standardization ... | High     | 77               | 72           | 2|i050h3:                         | Rank 3     
+ONT-38827   | Bug           | Internal Bug     | Stage | Dispatch Standardization ... | High     | 79               | 73           | 2|i0511r:                         | Rank 3     
+ONT-38927   | Bug           | Internal Bug     | Stage | Dispatch Standardization ... | High     | 81               | 74           | 2|i051tz:                         | Rank 3     
+ONT-39486   | Bug           | Internal Bug     | Preprod | Multiple location input... | High     | 86               | 75           | 2|i055pb:                         | Rank 3     
+ONT-39495   | Bug           | Internal Bug     | Preprod| On directly submitting t... | High     | 87               | 76           | 2|i055pz:                         | Rank 3     
+ONT-39605   | Bug           | Internal Bug     | View in ontic is not coming in em... | High     | 92               | 77           | 2|i056jz:                         | Rank 3     
+ONT-36330   | Bug           | Internal Bug     | Investigate error in spotlight wi... | Medium   | 66               | 78           | 2|i045f6:zzzx                     | Rank 3     
+ONT-35895   | Bug           | Internal Bug     | Stage | Attached images are remov... | Medium   | 67               | 79           | 2|i047wv:                         | Rank 3     
+ONT-28840   | Bug           | Internal Bug     | [Dynamic Rules]: Create Asset -> ... | Medium   | 69               | 80           | 2|i04963:                         | Rank 3     
+ONT-36304   | Bug           | Internal Bug     | Add handling to avoid email inges... | Medium   | 70               | 81           | 2|i04bin:                         | Rank 3     
+ONT-36530   | Bug           | Internal Bug     | Pre-prod | Field Name | Filters: ... | Medium   | 71               | 82           | 2|i04dmv:                         | Rank 3     
+ONT-36590   | Bug           | Internal Bug     | Incident details are not opening ... | Medium   | 72               | 83           | 2|i04edz:                         | Rank 3     
+ONT-38230   | Bug           | Internal Bug     | Notifications are not getting tri... | Medium   | 75               | 84           | 2|i04wl3:                         | Rank 3     
+ONT-38238   | Bug           | Internal Bug     | Not able to see report widget: ge... | Medium   | 76               | 85           | 2|i04wnj:                         | Rank 3     
+ONT-38919   | Bug           | Internal Bug     | Stage | Dispatch standardization ... | Medium   | 80               | 86           | 2|i051sf:                         | Rank 3     
+ONT-39485   | Bug           | Internal Bug     | Preprod | Dispatch Standardizatio... | Medium   | 85               | 87           | 2|i055p3:                         | Rank 3     
+ONT-39500   | Bug           | Internal Bug     | Preprod | Dispatch Standardizatio... | Medium   | 88               | 88           | 2|i055qn:                         | Rank 3     
+ONT-39561   | Bug           | Internal Bug     | After Risk Property is Disabled T... | Medium   | 89               | 89           | 2|i0565j:                         | Rank 3     
+ONT-36062   | Bug           | Internal Bug     | Pre-prod | Batch action | Dispatc... | Low      | 68               | 90           | 2|i0493r:                         | Rank 3     
+ONT-35534   | Bug           | Internal Bug     | Stage | Field Workflow | Incident... | Low      | 73               | 91           | 2|i04m5u:                         | Rank 3     
+ONT-38109   | Bug           | Internal Bug     | Stage | Dispatch standardization ... | Low      | 74               | 92           | 2|i04uzj:                         | Rank 3     
+Total issues: 92
+Moves required: 20
