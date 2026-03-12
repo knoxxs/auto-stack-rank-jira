@@ -8,6 +8,7 @@ from rich.console import Console
 from rich.logging import RichHandler
 from rich.align import Align
 from rich.panel import Panel
+from rich.styled import Styled
 from rich.text import Text
 from rich.table import Table
 
@@ -16,6 +17,8 @@ from jira_stackrank.ranking_engine import RankedIssue
 
 
 CONSOLE = Console()
+PRIORITY_COLUMN_WIDTH = 9
+POSITION_COLUMN_WIDTH = 5
 
 
 def configure_logging(log_path: Path) -> None:
@@ -61,16 +64,17 @@ def print_rank_preview(
         header_style="bold cyan",
         row_styles=["white", "bright_black"],
         expand=True,
+        padding=(0, 0),
     )
-    table.add_column("Issue Key", style="bold white", no_wrap=True)
-    table.add_column("Type", style="cyan")
-    table.add_column("Kind", style="magenta")
+    table.add_column("Issue Key", style="bold white", no_wrap=True, justify="center")
+    table.add_column("Type", style="cyan", justify="center")
+    table.add_column("Kind", style="magenta", justify="center")
     table.add_column("Title", overflow="ellipsis", max_width=34)
-    table.add_column("Priority", justify="center")
-    table.add_column("Current", justify="right")
-    table.add_column("New", justify="right")
-    table.add_column("Move", justify="right", style="green")
-    table.add_column("Bucket", style="bold blue")
+    table.add_column("Priority", justify="center", width=PRIORITY_COLUMN_WIDTH, no_wrap=True)
+    table.add_column("Current", justify="center", width=POSITION_COLUMN_WIDTH, no_wrap=True)
+    table.add_column("New", justify="center", width=POSITION_COLUMN_WIDTH, no_wrap=True)
+    table.add_column("Move", justify="center", style="green")
+    table.add_column("Bucket", style="bold blue", justify="center")
 
     for row in sorted(ranked, key=lambda item: item.new_position):
         movement = _movement_label(row.current_position, row.new_position)
@@ -170,31 +174,37 @@ def _movement_label(current_position: int, new_position: int) -> str:
 
 def _priority_label(priority_name: str | None) -> str:
     if not priority_name:
-        return "[dim]-[/dim]"
+        return _cell_text("-", PRIORITY_COLUMN_WIDTH, "dim")
     style = _priority_style(priority_name)
-    return f"[{style}] {priority_name} [/{style}]"
+    return _cell_text(priority_name.strip()[:PRIORITY_COLUMN_WIDTH], PRIORITY_COLUMN_WIDTH, style)
 
 
 def _position_label(position: int, changed: bool) -> str:
     if changed:
-        return f"[bold black on #93c5fd] {position} [/bold black on #93c5fd]"
-    return f"[white] {position} [/white]"
+        return _cell_text(str(position), POSITION_COLUMN_WIDTH, "bold black on #b8ccd8")
+    return _cell_text(str(position), POSITION_COLUMN_WIDTH, "white")
 
 
 def _priority_style(priority_name: str) -> str:
     normalized = priority_name.strip().casefold()
     styles = {
-        "critical": "bold white on #b91c1c",
-        "highest": "bold white on #dc2626",
-        "high": "bold black on #fb923c",
-        "medium": "bold black on #facc15",
-        "low": "bold black on #86efac",
-        "lowest": "bold black on #93c5fd",
+        "critical": "bold white on #a65d5d",
+        "highest": "bold white on #b86a6a",
+        "high": "bold black on #d9a07f",
+        "medium": "bold black on #c6b07a",
+        "low": "bold black on #97bda7",
+        "lowest": "bold black on #9ab4c7",
     }
-    return styles.get(normalized, "bold black on #d1d5db")
+    return styles.get(normalized, "bold black on #c6ccd2")
 
 
 def _format_duration(duration_seconds: float) -> str:
     if duration_seconds < 1:
         return f"{duration_seconds * 1000:.0f} ms"
     return f"{duration_seconds:.2f} s"
+
+
+def _cell_text(value: str, width: int, style: str):
+    text = Text(value, no_wrap=True)
+    aligned = Align.center(text, vertical="middle", width=width)
+    return Styled(aligned, style)
