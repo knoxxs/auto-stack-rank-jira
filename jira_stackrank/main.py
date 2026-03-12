@@ -5,12 +5,23 @@ from bisect import bisect_left
 import logging
 from pathlib import Path
 import sys
+from time import perf_counter
 from collections import Counter
 from dataclasses import dataclass, replace
 from datetime import datetime
 
 from jira_stackrank.cli_output import configure_logging as configure_rich_logging
-from jira_stackrank.cli_output import print_invalid_confirmation_response, print_rank_preview
+from jira_stackrank.cli_output import (
+    print_apply_complete,
+    print_apply_section,
+    print_execution_summary,
+    print_invalid_confirmation_response,
+    print_move_step,
+    print_no_changes,
+    print_rank_preview,
+    print_section_title,
+    print_step,
+)
 from jira_stackrank.cli_output import truncate_title
 from jira_stackrank.config import ConfigError, Settings, load_settings
 from jira_stackrank.jira_client import JiraClient, JiraClientError
@@ -31,37 +42,51 @@ class MovePlan:
 def main() -> int:
     configure_logging()
     args = parse_args()
+    started_at = perf_counter()
 
     try:
+        print_section_title("Jira Sprint Stack Rank", "Deterministic sprint ranking and move planning")
+        print_step("Loading configuration")
         settings = load_settings()
+        print_step("Connecting to Jira")
         client = JiraClient(settings)
         sprint = log_runtime_context(client, settings)
         if sprint is None:
             LOGGER.info("No active sprint found.")
             return 0
 
+        print_step(f"Fetching sprint {sprint.sprint_id} issues")
         issues = fetch_rankable_issues(client, settings, sprint.sprint_id)
+        print_step("Computing ranked order")
         ranked = compute_ranked_order(issues, settings)
         moves = build_move_plan(ranked)
-        log_rank_preview(ranked, moves, settings)
+        log_rank_preview(ranked, settings)
 
         if not moves:
             LOGGER.info("No reordering required.")
+            print_no_changes()
+            print_execution_summary(len(ranked), len(moves), apply_mode=args.apply, duration_seconds=perf_counter() - started_at)
             return 0
 
         if not args.apply:
+            print_execution_summary(len(ranked), len(moves), apply_mode=args.apply, duration_seconds=perf_counter() - started_at)
             return 0
 
-        for move in moves:
+        print_apply_section(len(moves))
+        for index, move in enumerate(moves, start=1):
             if args.confirm_each and not confirm_move(move):
                 LOGGER.info("Stopped before applying remaining rank updates.")
+                print_execution_summary(len(ranked), len(moves), apply_mode=args.apply, duration_seconds=perf_counter() - started_at)
                 return 0
+            print_move_step(move.issue_key, move.position, move.anchor_issue_key, index, len(moves))
             LOGGER.info("Moving %s %s %s", move.issue_key, move.position, move.anchor_issue_key)
             if move.position == "after":
                 client.move_issue_after(issue_key=move.issue_key, after_issue_key=move.anchor_issue_key)
             else:
                 client.move_issue_before(issue_key=move.issue_key, before_issue_key=move.anchor_issue_key)
         LOGGER.info("Applied %s rank updates.", len(moves))
+        print_apply_complete(len(moves))
+        print_execution_summary(len(ranked), len(moves), apply_mode=args.apply, duration_seconds=perf_counter() - started_at)
         return 0
     except (ConfigError, JiraClientError, RankingError) as exc:
         LOGGER.error(str(exc))
@@ -126,10 +151,8 @@ def log_unsupported_issue_types(issues: list[object]) -> None:
         LOGGER.warning("Unsupported issue types returned by Jira: %s", ", ".join(unsupported))
 
 
-def log_rank_preview(ranked: list[RankedIssue], moves: list[MovePlan], settings: Settings) -> None:
+def log_rank_preview(ranked: list[RankedIssue], settings: Settings) -> None:
     print_rank_preview(ranked, settings)
-    LOGGER.info("Total issues: %s", len(ranked))
-    LOGGER.info("Moves required: %s", len(moves))
 
 
 def configure_logging() -> Path:
