@@ -45,10 +45,13 @@ docs/
 ## Setup
 
 ```bash
+./scripts/bootstrap-asdf.sh
 poetry config virtualenvs.in-project true
 poetry install
 cp .env.example .env
 ```
+
+This repo pins tool versions in `.tool-versions` and plugin sources in `.tool-plugins`.
 
 Fill in `.env` with Jira credentials and board-specific values.
 

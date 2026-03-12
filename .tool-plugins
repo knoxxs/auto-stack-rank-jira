@@ -1,0 +1,2 @@
+poetry https://github.com/asdf-community/asdf-poetry.git
+python https://github.com/danhper/asdf-python.git
