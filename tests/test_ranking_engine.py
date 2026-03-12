@@ -14,6 +14,7 @@ def settings() -> Settings:
         epic_title_prefix_length=16,
         subtask_issue_types=("be sub-task", "bug sub-task", "fe sub-task", "qa sub-task"),
         title_truncation_limit=36,
+        request_timeout_seconds=30,
     )
 
 

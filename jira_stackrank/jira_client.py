@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import json
+import logging
 from dataclasses import dataclass, replace
 from typing import Any
 from urllib.error import HTTPError, URLError
@@ -10,6 +11,10 @@ from urllib.request import Request, urlopen
 
 from jira_stackrank.config import Settings
 from jira_stackrank.ranking_engine import IssueRecord
+
+
+LOGGER = logging.getLogger("jira_stackrank")
+
 
 class JiraClientError(Exception):
     """Raised when Jira API access fails."""
@@ -52,11 +57,17 @@ class JiraClient:
             # Jira custom field IDs vary between sites, so resolve them by display
             # name once and reuse the discovered IDs for later requests.
             lookup = {name.casefold() for name in names}
+            matches: list[str] = []
             for field in fields:
                 field_name = str(field.get("name", "")).casefold()
                 if field_name in lookup:
-                    return str(field.get("id"))
-            return None
+                    matches.append(str(field.get("id")))
+            if len(matches) > 1:
+                raise JiraClientError(
+                    f"Multiple Jira fields matched {', '.join(names)}. "
+                    "Please make the field names unique in Jira before running this tool."
+                )
+            return matches[0] if matches else None
 
         rank_field_id = None
         for field in fields:
@@ -100,7 +111,17 @@ class JiraClient:
         values = payload.get("values", [])
         if not values:
             return None
-        sprint = values[0]
+        active_sprints = [sprint for sprint in values if sprint.get("id") is not None]
+        if not active_sprints:
+            return None
+        sprint = max(active_sprints, key=lambda item: int(item["id"]))
+        if len(active_sprints) > 1:
+            chosen_name = str(sprint.get("name", ""))
+            chosen_id = int(sprint["id"])
+            LOGGER.warning(
+                f"Multiple active sprints found on board {self._settings.board_id}; "
+                f"using latest sprint {chosen_name or '<unnamed>'} ({chosen_id})."
+            )
         sprint_id = sprint.get("id")
         if sprint_id is None:
             return None
@@ -285,7 +306,7 @@ class JiraClient:
         )
 
         try:
-            with urlopen(request) as response:
+            with urlopen(request, timeout=self._settings.request_timeout_seconds) as response:
                 charset = response.headers.get_content_charset() or "utf-8"
                 content = response.read().decode(charset)
         except HTTPError as exc:

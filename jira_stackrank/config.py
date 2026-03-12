@@ -18,6 +18,7 @@ DEFAULT_SUBTASK_ISSUE_TYPES = (
     "qa sub-task",
 )
 DEFAULT_TITLE_TRUNCATION_LIMIT = 36
+DEFAULT_REQUEST_TIMEOUT_SECONDS = 30
 
 
 class ConfigError(Exception):
@@ -34,6 +35,7 @@ class Settings:
     epic_title_prefix_length: int
     subtask_issue_types: tuple[str, ...]
     title_truncation_limit: int
+    request_timeout_seconds: int
 
 
 def load_settings(env_path: str | Path = ENV_FILE) -> Settings:
@@ -55,6 +57,9 @@ def load_settings(env_path: str | Path = ENV_FILE) -> Settings:
         subtask_issue_types=_csv_tuple(values.get("SUBTASK_ISSUE_TYPES"), DEFAULT_SUBTASK_ISSUE_TYPES),
         title_truncation_limit=_int_value(
             values.get("TITLE_TRUNCATION_LIMIT"), DEFAULT_TITLE_TRUNCATION_LIMIT
+        ),
+        request_timeout_seconds=_int_value(
+            values.get("REQUEST_TIMEOUT_SECONDS"), DEFAULT_REQUEST_TIMEOUT_SECONDS
         ),
     )
 
