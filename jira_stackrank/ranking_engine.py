@@ -50,7 +50,7 @@ class RankedIssue:
 
 
 def compute_ranked_order(issues: list[IssueRecord], settings: Settings) -> list[RankedIssue]:
-    annotated = [(issue, _bucket_for(issue, settings)) for issue in issues]
+    annotated = [(issue, _bucket_for(issue)) for issue in issues]
 
     # Each band is sorted independently, then concatenated to match the PRD's
     # fixed Rank 1 -> Rank 2 -> Rank 3 precedence.
@@ -79,8 +79,7 @@ def compute_ranked_order(issues: list[IssueRecord], settings: Settings) -> list[
     ]
 
 
-def _bucket_for(issue: IssueRecord, settings: Settings) -> RankBucket:
-    del settings
+def _bucket_for(issue: IssueRecord) -> RankBucket:
     raw_issue_type = _normalize(issue.issue_type)
     issue_type = _canonical_issue_type(issue.issue_type)
 

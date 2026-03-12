@@ -95,7 +95,7 @@ class JiraClient:
         active_sprints = [sprint for sprint in payload.get("values", []) if sprint.get("id") is not None]
         if not active_sprints:
             return None
-        sprint = max(active_sprints, key=self._sprint_sort_key)
+        sprint = max(active_sprints, key=lambda sprint: int(sprint["id"]))
         self._log_parallel_sprint_choice(active_sprints, sprint)
         return SprintInfo(
             sprint_id=int(sprint["id"]),
@@ -242,8 +242,6 @@ class JiraClient:
         return json.loads(content)
 
     def _find_field_id(self, fields: list[dict[str, Any]], *names: str) -> str | None:
-        # Jira custom field IDs vary between sites, so resolve them by display
-        # name once and reuse the discovered IDs for later requests.
         lookup = {name.casefold() for name in names}
         matches = [
             str(field.get("id"))
@@ -256,9 +254,6 @@ class JiraClient:
                 "Please make the field names unique in Jira before running this tool."
             )
         return matches[0] if matches else None
-
-    def _sprint_sort_key(self, sprint: dict[str, Any]) -> int:
-        return int(sprint["id"])
 
     def _log_parallel_sprint_choice(
         self,
@@ -312,15 +307,14 @@ class JiraClient:
 
     def _requested_issue_fields(self, field_map: FieldMap) -> list[str]:
         requested_fields = ["issuetype", "priority", "status", "summary", "labels"]
-        optional_fields = (
+        requested_fields.extend((
             field_map.rank_field_id,
             field_map.epic_link_field_id,
             field_map.pod_field_id,
             field_map.found_in_environment_field_id,
             field_map.client_field_id,
-        )
-        requested_fields.extend(field_id for field_id in optional_fields if field_id)
-        return requested_fields
+        ))
+        return [field_id for field_id in requested_fields if field_id]
 
     def _annotate_client_bugs(self, issues: list[IssueRecord]) -> list[IssueRecord]:
         client_bug_keys = self._search_issue_keys(self._settings.client_bug_jql)
