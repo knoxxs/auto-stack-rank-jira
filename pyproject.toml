@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "jira-stackrank"
+version = "0.1.0"
+description = "Deterministic Jira sprint stack ranking utility"
+authors = ["OpenAI Codex"]
+readme = "README.md"
+packages = [{ include = "jira_stackrank" }]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.5"
+
+[tool.poetry.scripts]
+jira-stackrank = "jira_stackrank.main:main"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
