@@ -102,6 +102,44 @@ class JiraClient:
             sprint_name=str(sprint.get("name", "")),
         )
 
+    def get_sprint(self, sprint_selector: str) -> SprintInfo | None:
+        normalized_selector = sprint_selector.strip()
+        if not normalized_selector:
+            raise JiraClientError("Sprint selector cannot be empty.")
+
+        matched_sprints: list[dict[str, Any]] = []
+        start_at = 0
+
+        while True:
+            payload = self._request_json(
+                "GET",
+                f"/rest/agile/1.0/board/{self._settings.board_id}/sprint",
+                {
+                    "startAt": start_at,
+                    "maxResults": 50,
+                    "state": "active,closed,future",
+                },
+            )
+            page_sprints = [sprint for sprint in payload.get("values", []) if sprint.get("id") is not None]
+            matched_sprints.extend(
+                sprint for sprint in page_sprints if self._sprint_matches_selector(sprint, normalized_selector)
+            )
+
+            is_last = bool(payload.get("isLast", False))
+            start_at += len(page_sprints)
+            if is_last or not page_sprints:
+                break
+
+        if not matched_sprints:
+            return None
+
+        sprint = self._choose_matching_sprint(matched_sprints, normalized_selector)
+
+        return SprintInfo(
+            sprint_id=int(sprint["id"]),
+            sprint_name=str(sprint.get("name", "")),
+        )
+
     def get_active_sprint_issues(
         self, sprint_id: int, field_map: FieldMap, priority_order: dict[str, int]
     ) -> list[IssueRecord]:
@@ -254,6 +292,34 @@ class JiraClient:
                 "Please make the field names unique in Jira before running this tool."
             )
         return matches[0] if matches else None
+
+    def _sprint_matches_selector(self, sprint: dict[str, Any], selector: str) -> bool:
+        sprint_id = sprint.get("id")
+        sprint_name = str(sprint.get("name", ""))
+        return str(sprint_id) == selector or self._normalized_sprint_name(sprint_name) == self._normalized_sprint_name(
+            selector
+        )
+
+    def _choose_matching_sprint(self, matched_sprints: list[dict[str, Any]], selector: str) -> dict[str, Any]:
+        exact_id_matches = [sprint for sprint in matched_sprints if str(sprint.get("id")) == selector]
+        if len(exact_id_matches) == 1:
+            return exact_id_matches[0]
+
+        if len(matched_sprints) == 1:
+            return matched_sprints[0]
+
+        sprint_names = ", ".join(
+            f"{str(item.get('name', '')) or '<unnamed>'} ({int(item['id'])})" for item in matched_sprints
+        )
+        raise JiraClientError(
+            f"Multiple sprints matched {selector!r} on board {self._settings.board_id}: {sprint_names}."
+        )
+
+    def _normalized_sprint_name(self, sprint_name: str) -> str:
+        normalized_name = sprint_name.strip().casefold()
+        if normalized_name.startswith("sprint "):
+            return normalized_name.removeprefix("sprint ").strip()
+        return normalized_name
 
     def _log_parallel_sprint_choice(
         self,

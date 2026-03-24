@@ -135,6 +135,73 @@ class JiraClientTests(unittest.TestCase):
         self.assertEqual(12, sprint.sprint_id)
         warning_mock.assert_not_called()
 
+    def test_get_sprint_matches_exact_name_across_pages(self) -> None:
+        client = JiraClient(settings())
+
+        with patch.object(
+            client,
+            "_request_json",
+            side_effect=[
+                {"values": [{"id": 11, "name": "Sprint 11"}], "isLast": False},
+                {"values": [{"id": 12, "name": "Release Sprint"}], "isLast": True},
+            ],
+        ):
+            sprint = client.get_sprint("Release Sprint")
+
+        self.assertIsNotNone(sprint)
+        assert sprint is not None
+        self.assertEqual(12, sprint.sprint_id)
+        self.assertEqual("Release Sprint", sprint.sprint_name)
+
+    def test_get_sprint_matches_by_id(self) -> None:
+        client = JiraClient(settings())
+
+        with patch.object(
+            client,
+            "_request_json",
+            return_value={"values": [{"id": 42, "name": "Sprint 42"}], "isLast": True},
+        ):
+            sprint = client.get_sprint("42")
+
+        self.assertIsNotNone(sprint)
+        assert sprint is not None
+        self.assertEqual(42, sprint.sprint_id)
+        self.assertEqual("Sprint 42", sprint.sprint_name)
+
+    def test_get_sprint_matches_bare_number_against_sprint_name(self) -> None:
+        client = JiraClient(settings())
+
+        with patch.object(
+            client,
+            "_request_json",
+            return_value={"values": [{"id": 1088, "name": "Sprint 115"}], "isLast": True},
+        ):
+            sprint = client.get_sprint("115")
+
+        self.assertIsNotNone(sprint)
+        assert sprint is not None
+        self.assertEqual(1088, sprint.sprint_id)
+        self.assertEqual("Sprint 115", sprint.sprint_name)
+
+    def test_get_sprint_raises_when_multiple_names_match(self) -> None:
+        client = JiraClient(settings())
+
+        with patch.object(
+            client,
+            "_request_json",
+            return_value={
+                "values": [
+                    {"id": 42, "name": "Release Sprint"},
+                    {"id": 43, "name": "release sprint"},
+                ],
+                "isLast": True,
+            },
+        ):
+            with self.assertRaises(JiraClientError) as exc_info:
+                client.get_sprint("Release Sprint")
+
+        self.assertIn("Multiple sprints matched", str(exc_info.exception))
+
     def test_search_issues_follows_next_page_tokens(self) -> None:
         client = JiraClient(settings())
 

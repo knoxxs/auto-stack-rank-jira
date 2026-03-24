@@ -4,6 +4,7 @@ Deterministic Jira sprint stack-ranking CLI for a single board.
 
 The tool:
 - finds the active sprint on the configured Jira board
+- optionally targets a specific sprint by id or exact name
 - fetches all board-visible sprint issues
 - removes configured sub-task issue types
 - computes the target order from the ranking rules
@@ -77,6 +78,13 @@ Dry run:
 
 ```bash
 poetry run jira-stackrank
+```
+
+Dry run for a specific sprint:
+
+```bash
+poetry run jira-stackrank --sprint 114
+poetry run jira-stackrank --sprint "Sprint 114"
 ```
 
 Apply rank changes:

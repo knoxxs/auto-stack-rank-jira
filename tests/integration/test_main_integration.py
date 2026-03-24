@@ -46,6 +46,7 @@ class FakeJiraClient:
     def __init__(self, issues: list[IssueRecord], sprint: SprintInfo | None) -> None:
         self._issues = issues
         self._sprint = sprint
+        self.sprint_lookup_calls: list[str] = []
         self.after_moves: list[tuple[str, str]] = []
         self.before_moves: list[tuple[str, str]] = []
 
@@ -65,6 +66,10 @@ class FakeJiraClient:
         return {"p1": 0, "p2": 1}
 
     def get_active_sprint(self) -> SprintInfo | None:
+        return self._sprint
+
+    def get_sprint(self, sprint_selector: str) -> SprintInfo | None:
+        self.sprint_lookup_calls.append(sprint_selector)
         return self._sprint
 
     def get_active_sprint_issues(
@@ -111,6 +116,23 @@ class MainIntegrationTests(unittest.TestCase):
         self.assertEqual(0, exit_code)
         self.assertEqual([("TASK-2", "TASK-1")], client.before_moves)
         self.assertEqual([], client.after_moves)
+
+    def test_main_uses_requested_sprint_when_sprint_flag_is_present(self) -> None:
+        client = FakeJiraClient(
+            issues=[
+                issue("TASK-1", original_index=0, priority_rank=0),
+            ],
+            sprint=SprintInfo(sprint_id=77, sprint_name="Sprint 77"),
+        )
+
+        with patch("jira_stackrank.main.configure_logging", return_value=Path("logs/test.log")):
+            with patch("jira_stackrank.main.load_settings", return_value=settings()):
+                with patch("jira_stackrank.main.JiraClient", return_value=client):
+                    with patch("sys.argv", ["jira-stackrank", "--sprint", "Sprint 77"]):
+                        exit_code = main()
+
+        self.assertEqual(0, exit_code)
+        self.assertEqual(["Sprint 77"], client.sprint_lookup_calls)
 
 
 if __name__ == "__main__":

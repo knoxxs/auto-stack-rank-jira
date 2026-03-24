@@ -55,9 +55,12 @@ def main() -> int:
         settings = load_settings()
         print_step("Connecting to Jira")
         client = JiraClient(settings)
-        sprint = get_active_sprint(client, settings)
+        sprint = resolve_sprint(client, settings, args.sprint)
         if sprint is None:
-            LOGGER.info("No active sprint found.")
+            if args.sprint:
+                LOGGER.info("Sprint %r was not found on board %s.", args.sprint, settings.board_id)
+            else:
+                LOGGER.info("No active sprint found.")
             return 0
 
         print_step(f"Fetching sprint {sprint.sprint_id} issues")
@@ -102,6 +105,10 @@ def main() -> int:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Deterministically reorder Jira sprint issues.")
+    parser.add_argument(
+        "--sprint",
+        help="Sprint id or exact sprint name to rank. Defaults to the current active sprint.",
+    )
     parser.add_argument("--apply", action="store_true", help="Apply Jira rank changes.")
     parser.add_argument(
         "--confirm-each",
@@ -111,7 +118,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def get_active_sprint(client: JiraClient, settings: Settings):
+def resolve_sprint(client: JiraClient, settings: Settings, sprint_selector: str | None):
     LOGGER.info("Using Jira base URL: %s", settings.jira_base_url)
     board = client.get_board_info()
     LOGGER.info(
@@ -120,6 +127,17 @@ def get_active_sprint(client: JiraClient, settings: Settings):
         board.board_id,
         board.board_type or "<unknown>",
     )
+
+    if sprint_selector:
+        sprint = client.get_sprint(sprint_selector)
+        if sprint is not None:
+            LOGGER.info(
+                "Selected sprint from --sprint: %s (%s)",
+                sprint.sprint_name or "<unnamed>",
+                sprint.sprint_id,
+            )
+        return sprint
+
     sprint = client.get_active_sprint()
     if sprint is not None:
         LOGGER.info("Selected active sprint: %s (%s)", sprint.sprint_name or "<unnamed>", sprint.sprint_id)
