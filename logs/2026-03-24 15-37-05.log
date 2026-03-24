@@ -1,0 +1,35 @@
+Writing run log to /Users/aapa/workspace/projects/personal/auto-stack-rank-jira/logs/2026-03-24 15-37-05.log
+Using Jira base URL: https://ontichelp.atlassian.net
+Using board: IICM (1124, type=scrum)
+Selected sprint from --sprint: Sprint 115 (1088)
+Fetched 77 issues from board 1124 sprint 1088.
+Fetched issue type counts: BE Sub-task=20, Bug=27, Enhancements=15, FE Sub-task=7, QA Sub-task=2, Task=5, Vulnerability=1
+Ignoring 29 sub-task issues.
+Ranking 48 non-sub-task issues.
+Moving SECOP-320 before ONT-38091
+Moving ONT-39654 after ONT-39428
+Moving ONT-39840 after ONT-39654
+Moving ONT-38852 after ONT-39840
+Moving ONT-39470 after ONT-38852
+Moving ONT-39660 after ONT-39470
+Moving ONT-39781 after ONT-39660
+Moving ONT-39832 after ONT-39781
+Moving ONT-39866 after ONT-39832
+Moving ONT-39867 after ONT-39866
+Moving ONT-39944 after ONT-39867
+Moving ONT-39951 after ONT-39944
+Moving ONT-39940 after ONT-36621
+Moving ONT-38988 after ONT-38992
+Moving ONT-40183 after ONT-38988
+Moving ONT-38506 after ONT-40183
+Moving ONT-39953 after ONT-38506
+Moving ONT-40123 after ONT-34776
+Moving ONT-35480 after ONT-40123
+Moving ONT-38685 after ONT-35480
+Moving ONT-38781 after ONT-38685
+Moving ONT-39383 after ONT-38781
+Moving ONT-39833 after ONT-39383
+Moving ONT-39852 after ONT-39833
+Moving ONT-39946 after ONT-39852
+Moving ONT-40052 after ONT-39796
+Applied 26 rank updates.
