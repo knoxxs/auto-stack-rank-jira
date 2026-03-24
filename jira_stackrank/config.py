@@ -14,6 +14,7 @@ DEFAULT_EPIC_TITLE_PREFIX_LENGTH = 16
 DEFAULT_SUBTASK_ISSUE_TYPES = (
     "be sub-task",
     "bug sub-task",
+    "design sub-task",
     "fe sub-task",
     "qa sub-task",
 )
