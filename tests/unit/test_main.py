@@ -2,7 +2,8 @@ import unittest
 from unittest.mock import patch
 
 from jira_stackrank.config import Settings
-from jira_stackrank.main import MovePlan, apply_moves, fetch_rankable_issues, handle_noop_run
+from jira_stackrank.jira_client import SprintInfo
+from jira_stackrank.main import MovePlan, apply_moves, fetch_rankable_issues, handle_noop_run, resolve_sprint
 from jira_stackrank.ranking_engine import IssueRecord, RankBucket, RankedIssue
 
 
@@ -14,7 +15,7 @@ def settings() -> Settings:
         board_id=1124,
         client_bug_jql='type in ("Bug", "Vulnerability")',
         epic_title_prefix_length=16,
-        subtask_issue_types=("be sub-task", "bug sub-task", "fe sub-task", "qa sub-task"),
+        subtask_issue_types=("be sub-task", "bug sub-task", "design sub-task", "fe sub-task", "qa sub-task"),
         title_truncation_limit=36,
         request_timeout_seconds=30,
     )
@@ -53,6 +54,17 @@ class FakeRankMover:
 
 
 class MainHelperTests(unittest.TestCase):
+    def test_resolve_sprint_uses_named_sprint_when_selector_is_present(self) -> None:
+        client = unittest.mock.Mock()
+        client.get_board_info.return_value = unittest.mock.Mock(board_id=1124, board_name="Board", board_type="scrum")
+        client.get_sprint.return_value = SprintInfo(sprint_id=88, sprint_name="Sprint 88")
+
+        sprint = resolve_sprint(client, settings(), "Sprint 88")
+
+        self.assertEqual(SprintInfo(sprint_id=88, sprint_name="Sprint 88"), sprint)
+        client.get_sprint.assert_called_once_with("Sprint 88")
+        client.get_active_sprint.assert_not_called()
+
     def test_handle_noop_run_emits_summary_when_there_are_no_moves(self) -> None:
         ranked = [
             RankedIssue(
@@ -114,8 +126,9 @@ class MainHelperTests(unittest.TestCase):
         client.get_priority_order.return_value = {"high": 0}
         client.get_active_sprint_issues.return_value = [
             issue("SUB-1", "BE Sub-task", 0),
-            issue("TASK-1", "Task", 1),
-            issue("TASK-2", "Task", 2),
+            issue("SUB-2", "Design Sub-task", 1),
+            issue("TASK-1", "Task", 2),
+            issue("TASK-2", "Task", 3),
         ]
 
         issues = fetch_rankable_issues(client, settings(), sprint_id=10)
