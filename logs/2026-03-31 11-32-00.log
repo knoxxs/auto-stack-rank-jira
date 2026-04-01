@@ -1,0 +1,10 @@
+Writing run log to /Users/aapa/workspace/projects/personal/auto-stack-rank-jira/logs/2026-03-31 11-32-00.log
+Using Jira base URL: https://ontichelp.atlassian.net
+Using board: IICM (1124, type=scrum)
+Selected sprint from --sprint: Sprint 115 (1088)
+Fetched 182 issues from board 1124 sprint 1088.
+Fetched issue type counts: BE Sub-task=46, Bug=43, Bug Sub-task=14, Design Sub-task=1, Enhancements=15, FE Sub-task=27, Lite Task=1, QA Sub-task=19, Task=16
+Ignoring 107 sub-task issues.
+Ranking 75 non-sub-task issues.
+Unsupported issue types returned by Jira: ONT-40655 (Lite Task)
+Issue ONT-40655 has unsupported type 'Lite Task'. The PRD only defines ranking for Bug, Enhancement, and Task.

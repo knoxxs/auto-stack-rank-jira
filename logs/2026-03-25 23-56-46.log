@@ -1,0 +1,9 @@
+Writing run log to /Users/aapa/workspace/projects/personal/auto-stack-rank-jira/logs/2026-03-25 23-56-46.log
+Using Jira base URL: https://ontichelp.atlassian.net
+Using board: IICM (1124, type=scrum)
+Selected sprint from --sprint: Sprint 115 (1088)
+Fetched 169 issues from board 1124 sprint 1088.
+Fetched issue type counts: BE Sub-task=46, Bug=37, Bug Sub-task=7, Design Sub-task=1, Enhancements=16, FE Sub-task=26, QA Sub-task=19, Task=16, Vulnerability=1
+Ignoring 99 sub-task issues.
+Ranking 70 non-sub-task issues.
+No reordering required.
