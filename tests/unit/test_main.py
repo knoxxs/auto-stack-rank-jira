@@ -15,7 +15,7 @@ def settings() -> Settings:
         board_id=1124,
         client_bug_jql='type in ("Bug", "Vulnerability")',
         epic_title_prefix_length=16,
-        subtask_issue_types=("be sub-task", "bug sub-task", "design sub-task", "fe sub-task", "qa sub-task"),
+        subtask_issue_types=("be sub-task", "bug sub-task", "design sub-task", "fe sub-task", "lite task", "qa sub-task"),
         title_truncation_limit=36,
         request_timeout_seconds=30,
     )
@@ -127,8 +127,9 @@ class MainHelperTests(unittest.TestCase):
         client.get_active_sprint_issues.return_value = [
             issue("SUB-1", "BE Sub-task", 0),
             issue("SUB-2", "Design Sub-task", 1),
-            issue("TASK-1", "Task", 2),
-            issue("TASK-2", "Task", 3),
+            issue("SUB-3", "Lite Task", 2),
+            issue("TASK-1", "Task", 3),
+            issue("TASK-2", "Task", 4),
         ]
 
         issues = fetch_rankable_issues(client, settings(), sprint_id=10)

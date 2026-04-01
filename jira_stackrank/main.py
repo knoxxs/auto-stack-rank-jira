@@ -107,7 +107,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Deterministically reorder Jira sprint issues.")
     parser.add_argument(
         "--sprint",
-        help="Sprint id or exact sprint name to rank. Defaults to the current active sprint.",
+        help="Sprint label number or exact sprint name to rank. Defaults to the current active sprint.",
     )
     parser.add_argument("--apply", action="store_true", help="Apply Jira rank changes.")
     parser.add_argument(

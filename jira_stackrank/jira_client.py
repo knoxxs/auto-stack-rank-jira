@@ -294,17 +294,10 @@ class JiraClient:
         return matches[0] if matches else None
 
     def _sprint_matches_selector(self, sprint: dict[str, Any], selector: str) -> bool:
-        sprint_id = sprint.get("id")
         sprint_name = str(sprint.get("name", ""))
-        return str(sprint_id) == selector or self._normalized_sprint_name(sprint_name) == self._normalized_sprint_name(
-            selector
-        )
+        return self._normalized_sprint_name(sprint_name) == self._normalized_sprint_name(selector)
 
     def _choose_matching_sprint(self, matched_sprints: list[dict[str, Any]], selector: str) -> dict[str, Any]:
-        exact_id_matches = [sprint for sprint in matched_sprints if str(sprint.get("id")) == selector]
-        if len(exact_id_matches) == 1:
-            return exact_id_matches[0]
-
         if len(matched_sprints) == 1:
             return matched_sprints[0]
 

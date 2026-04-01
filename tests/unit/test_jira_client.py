@@ -153,7 +153,7 @@ class JiraClientTests(unittest.TestCase):
         self.assertEqual(12, sprint.sprint_id)
         self.assertEqual("Release Sprint", sprint.sprint_name)
 
-    def test_get_sprint_matches_by_id(self) -> None:
+    def test_get_sprint_does_not_match_internal_jira_id(self) -> None:
         client = JiraClient(settings())
 
         with patch.object(
@@ -165,7 +165,6 @@ class JiraClientTests(unittest.TestCase):
 
         self.assertIsNotNone(sprint)
         assert sprint is not None
-        self.assertEqual(42, sprint.sprint_id)
         self.assertEqual("Sprint 42", sprint.sprint_name)
 
     def test_get_sprint_matches_bare_number_against_sprint_name(self) -> None:
@@ -182,6 +181,18 @@ class JiraClientTests(unittest.TestCase):
         assert sprint is not None
         self.assertEqual(1088, sprint.sprint_id)
         self.assertEqual("Sprint 115", sprint.sprint_name)
+
+    def test_get_sprint_returns_none_when_only_internal_id_matches(self) -> None:
+        client = JiraClient(settings())
+
+        with patch.object(
+            client,
+            "_request_json",
+            return_value={"values": [{"id": 116, "name": "Sprint 220"}], "isLast": True},
+        ):
+            sprint = client.get_sprint("116")
+
+        self.assertIsNone(sprint)
 
     def test_get_sprint_raises_when_multiple_names_match(self) -> None:
         client = JiraClient(settings())

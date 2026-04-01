@@ -16,6 +16,7 @@ DEFAULT_SUBTASK_ISSUE_TYPES = (
     "bug sub-task",
     "design sub-task",
     "fe sub-task",
+    "lite task",
     "qa sub-task",
 )
 DEFAULT_TITLE_TRUNCATION_LIMIT = 36
