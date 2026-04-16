@@ -1,0 +1,3 @@
+Writing run log to /Users/aapa/workspace/projects/personal/auto-stack-rank-jira/logs/2026-04-09 11-59-23.log
+Using Jira base URL: https://ontichelp.atlassian.net
+Jira API request failed with HTTP 401: Client must be authenticated to access this resource.
