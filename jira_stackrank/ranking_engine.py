@@ -179,6 +179,7 @@ def _normalize(value: str | None) -> str:
 def _canonical_issue_type(issue_type: str | None) -> str:
     normalized = _normalize(issue_type)
     aliases = {
+        "custom request": "task",
         "vulnerability": "bug",
         "enhancements": "enhancement",
     }

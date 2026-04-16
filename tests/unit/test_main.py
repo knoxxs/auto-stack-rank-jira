@@ -137,6 +137,21 @@ class MainHelperTests(unittest.TestCase):
         self.assertEqual(["TASK-1", "TASK-2"], [item.key for item in issues])
         self.assertEqual([0, 1], [item.original_index for item in issues])
 
+    def test_fetch_rankable_issues_does_not_warn_for_custom_request(self) -> None:
+        client = unittest.mock.Mock()
+        client.discover_fields.return_value = "fields"
+        client.get_priority_order.return_value = {"high": 0}
+        client.get_active_sprint_issues.return_value = [
+            issue("CCR-713", "Custom Request", 0),
+            issue("TASK-1", "Task", 1),
+        ]
+
+        with patch("jira_stackrank.main.LOGGER.warning") as warning_mock:
+            issues = fetch_rankable_issues(client, settings(), sprint_id=10)
+
+        self.assertEqual(["CCR-713", "TASK-1"], [item.key for item in issues])
+        warning_mock.assert_not_called()
+
 
 if __name__ == "__main__":
     unittest.main()

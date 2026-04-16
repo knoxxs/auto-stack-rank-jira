@@ -49,6 +49,7 @@ When executed, the utility:
 * Active sprint only
 * All issues in sprint including Done
 * Ignore issue types: `BE Sub-task`, `Bug Sub-task`, `FE Sub-task`, `QA Sub-task`
+* Treat `Custom Request` / `CCR` as `Task`
 * Treat `Vulnerability` as `Client Bug`
 * Deterministic full ordering logic
 * CLI execution
@@ -173,6 +174,7 @@ Note:
   * `Bug Sub-task`
   * `FE Sub-task`
   * `QA Sub-task`
+* The utility must normalize `Custom Request` / `CCR` issues to `Task` before ranking
 * After excluding ignored issue types, the utility must reassign current positions based on the remaining board order
 * No other issue types may be ignored unless explicitly defined here
 
@@ -214,8 +216,10 @@ Sorting:
 
 Sequence:
 
+`Custom Request` / `CCR` must be treated exactly as `Task` for all Rank 2 rules.
+
 1. Enhancements without epic or Enhancements/Tasks with epic (with all Enhancements/Tasks of same epic grouped together)
-2. Tasks without epic
+2. Tasks without epic, including normalized `Custom Request` / `CCR` issues
 
 ---
 
@@ -350,7 +354,7 @@ No reordering required.
 * API failure → abort execution
 * Missing priority → treated as lowest
 * Unknown fields → handled safely
-* Any unsupported non-ignored issue type → abort execution with clear error
+* Any unsupported non-ignored issue type after normalization → abort execution with clear error
 
 Dry run must never mutate state.
 
