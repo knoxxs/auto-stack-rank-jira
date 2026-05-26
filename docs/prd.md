@@ -203,7 +203,7 @@ Criteria:
 * `type = Bug` or `type = Vulnerability`
 * `Pod = pod-iicm`
 * `Found in Environment = Production`
-* `Client != Ontic Technologies`
+* `Client - SFDC != Ontic Technologies || 0011U00001I3ol4QAB`
 
 Sorting:
 

@@ -68,7 +68,7 @@ class JiraClientTests(unittest.TestCase):
                 {"id": "customfield_epic", "name": "Epic Link"},
                 {"id": "customfield_pod", "name": "Pod"},
                 {"id": "customfield_env", "name": "Found in Environment"},
-                {"id": "customfield_client", "name": "Client"},
+                {"id": "customfield_client", "name": "Client - SFDC"},
             ],
         ):
             field_map = client.discover_fields()

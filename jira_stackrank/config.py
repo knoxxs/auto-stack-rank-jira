@@ -8,7 +8,7 @@ ENV_FILE = ".env"
 DEFAULT_BOARD_ID = 1124
 DEFAULT_CLIENT_BUG_JQL = (
     '(type = "Bug" AND Pod = "pod-iicm" AND "Found in Environment" = Production '
-    'AND Client != "Ontic Technologies") or type = "Vulnerability"'
+    'AND "Client - SFDC" != "Ontic Technologies || 0011U00001I3ol4QAB") or type = "Vulnerability"'
 )
 DEFAULT_EPIC_TITLE_PREFIX_LENGTH = 16
 DEFAULT_SUBTASK_ISSUE_TYPES = (

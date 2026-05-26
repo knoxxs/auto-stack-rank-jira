@@ -25,6 +25,26 @@ class LoadSettingsTests(unittest.TestCase):
         self.assertEqual(1124, loaded.board_id)
         self.assertEqual(30, loaded.request_timeout_seconds)
 
+    def test_default_client_bug_jql_uses_client_sfdc_stored_value(self) -> None:
+        env_body = """
+        JIRA_EMAIL=user@example.com
+        JIRA_API_TOKEN=secret
+        JIRA_BASE_URL=https://example.atlassian.net
+        """
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            env_path = Path(temp_dir) / ".env"
+            env_path.write_text(env_body, encoding="utf-8")
+
+            loaded = load_settings(env_path)
+
+        self.assertIn(
+            '"Client - SFDC" != "Ontic Technologies || 0011U00001I3ol4QAB"',
+            loaded.client_bug_jql,
+        )
+        self.assertNotIn('Client != "Ontic Technologies"', loaded.client_bug_jql)
+        self.assertNotIn('"Client - SFDC" != "Ontic Technologies"', loaded.client_bug_jql)
+
     def test_load_settings_parses_optional_overrides(self) -> None:
         env_body = """
         JIRA_EMAIL=user@example.com

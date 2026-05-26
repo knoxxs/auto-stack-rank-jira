@@ -64,7 +64,7 @@ class JiraClient:
             epic_link_field_id=self._find_field_id(fields, "Epic Link"),
             pod_field_id=self._find_field_id(fields, "Pod"),
             found_in_environment_field_id=self._find_field_id(fields, "Found in Environment"),
-            client_field_id=self._find_field_id(fields, "Client"),
+            client_field_id=self._find_field_id(fields, "Client - SFDC"),
         )
 
     def get_board_info(self) -> BoardInfo:
