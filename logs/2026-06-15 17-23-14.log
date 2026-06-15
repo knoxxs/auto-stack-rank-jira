@@ -1,0 +1,10 @@
+Writing run log to /Users/agupta2/workspace/ontic/auto-stack-rank-jira/logs/2026-06-15 17-23-14.log
+Using Jira base URL: https://ontichelp.atlassian.net
+Using board: IICM (1124, type=scrum)
+Selected sprint from --sprint: Sprint 118 (1262)
+Fetched 115 issues from board 1124 sprint 1262.
+Fetched issue type counts: BE Sub-task=36, Bug=26, Custom Request=1, Enhancements=9, FE Sub-task=14, Property=1, QA Sub-task=1, Task=21, Vulnerability=6
+Ignoring 51 sub-task issues.
+Ranking 64 non-sub-task issues.
+Unsupported issue types returned by Jira: CCR-272 (Custom Request), CCR-799 (Property)
+Issue CCR-272 has unsupported type 'Custom Request'. The PRD only defines ranking for Bug, Enhancement, and Task.

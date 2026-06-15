@@ -1,0 +1,9 @@
+Writing run log to /Users/agupta2/workspace/auto-stack-rank-jira/logs/2026-06-15 17-39-26.log
+Using Jira base URL: https://ontichelp.atlassian.net
+Using board: IICM (1124, type=scrum)
+Selected sprint from --sprint: Sprint 119 (1295)
+Fetched 28 issues from board 1124 sprint 1295.
+Fetched issue type counts: Bug=13, Debug Sub-task=1, Enhancements=10, Task=4
+Ranking 28 non-sub-task issues.
+Unsupported issue types returned by Jira: ONT-44081 (Debug Sub-task)
+Issue ONT-44081 has unsupported type 'Debug Sub-task'. The PRD only defines ranking for Bug, Enhancement, and Task.
