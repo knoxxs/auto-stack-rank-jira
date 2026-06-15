@@ -23,6 +23,7 @@ class LoadSettingsTests(unittest.TestCase):
         self.assertEqual("secret", loaded.jira_api_token)
         self.assertEqual("https://example.atlassian.net", loaded.jira_base_url)
         self.assertEqual(1124, loaded.board_id)
+        self.assertIn("debug sub-task", loaded.subtask_issue_types)
         self.assertEqual(30, loaded.request_timeout_seconds)
 
     def test_default_client_bug_jql_uses_client_sfdc_stored_value(self) -> None:

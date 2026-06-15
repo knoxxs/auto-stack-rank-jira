@@ -48,7 +48,7 @@ When executed, the utility:
 * Board ID: `1124`
 * Active sprint only
 * All issues in sprint including Done
-* Ignore issue types: `BE Sub-task`, `Bug Sub-task`, `FE Sub-task`, `QA Sub-task`
+* Ignore issue types: `BE Sub-task`, `Bug Sub-task`, `Debug Sub-task`, `Design Sub-task`, `FE Sub-task`, `Lite Task`, `QA Sub-task`
 * Treat `Custom Request`, `Property`, and `CCR` work as `Task`
 * Treat `Vulnerability` as `Client Bug`
 * Deterministic full ordering logic
@@ -172,7 +172,10 @@ Note:
 * The utility must fetch all returned sprint issues, then exclude only:
   * `BE Sub-task`
   * `Bug Sub-task`
+  * `Debug Sub-task`
+  * `Design Sub-task`
   * `FE Sub-task`
+  * `Lite Task`
   * `QA Sub-task`
 * The utility must normalize `Custom Request`, `Property`, and `CCR` issues to `Task` before ranking
 * After excluding ignored issue types, the utility must reassign current positions based on the remaining board order

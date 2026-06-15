@@ -4,6 +4,7 @@
 
 - Improved project documentation and organized docs under `docs/`
 - Treat Jira `Property` issues as Task/Rank 2 work.
+- Ignore Jira `Debug Sub-task` issues during ranking.
 
 ## 2026-03-13
 
