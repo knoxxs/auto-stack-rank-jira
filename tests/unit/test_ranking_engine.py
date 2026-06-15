@@ -57,6 +57,17 @@ class ComputeRankedOrderTests(unittest.TestCase):
         self.assertIsNone(ranked["CCR-1"].kind)
         self.assertEqual("Rank 2", ranked["CCR-1"].rank_bucket.value)
 
+    def test_property_is_treated_as_task_in_rank_2(self) -> None:
+        issues = [
+            issue("CCR-799", "Property", 0, 1, None),
+            issue("ENH-1", "Enhancement", 1, 2, None),
+        ]
+
+        ranked = {item.key: item for item in compute_ranked_order(issues, settings())}
+
+        self.assertIsNone(ranked["CCR-799"].kind)
+        self.assertEqual("Rank 2", ranked["CCR-799"].rank_bucket.value)
+
     def test_vulnerability_is_treated_as_rank_1_client_bug(self) -> None:
         issues = [issue("BUG-1", "Vulnerability", 0, 2, None)]
 

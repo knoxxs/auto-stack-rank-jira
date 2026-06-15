@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Improved project documentation and organized docs under `docs/`
+- Treat Jira `Property` issues as Task/Rank 2 work.
 
 ## 2026-03-13
 

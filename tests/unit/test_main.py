@@ -152,6 +152,21 @@ class MainHelperTests(unittest.TestCase):
         self.assertEqual(["CCR-713", "TASK-1"], [item.key for item in issues])
         warning_mock.assert_not_called()
 
+    def test_fetch_rankable_issues_does_not_warn_for_property(self) -> None:
+        client = unittest.mock.Mock()
+        client.discover_fields.return_value = "fields"
+        client.get_priority_order.return_value = {"high": 0}
+        client.get_active_sprint_issues.return_value = [
+            issue("CCR-799", "Property", 0),
+            issue("TASK-1", "Task", 1),
+        ]
+
+        with patch("jira_stackrank.main.LOGGER.warning") as warning_mock:
+            issues = fetch_rankable_issues(client, settings(), sprint_id=10)
+
+        self.assertEqual(["CCR-799", "TASK-1"], [item.key for item in issues])
+        warning_mock.assert_not_called()
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -49,7 +49,7 @@ When executed, the utility:
 * Active sprint only
 * All issues in sprint including Done
 * Ignore issue types: `BE Sub-task`, `Bug Sub-task`, `FE Sub-task`, `QA Sub-task`
-* Treat `Custom Request` / `CCR` as `Task`
+* Treat `Custom Request`, `Property`, and `CCR` work as `Task`
 * Treat `Vulnerability` as `Client Bug`
 * Deterministic full ordering logic
 * CLI execution
@@ -174,7 +174,7 @@ Note:
   * `Bug Sub-task`
   * `FE Sub-task`
   * `QA Sub-task`
-* The utility must normalize `Custom Request` / `CCR` issues to `Task` before ranking
+* The utility must normalize `Custom Request`, `Property`, and `CCR` issues to `Task` before ranking
 * After excluding ignored issue types, the utility must reassign current positions based on the remaining board order
 * No other issue types may be ignored unless explicitly defined here
 
@@ -216,10 +216,10 @@ Sorting:
 
 Sequence:
 
-`Custom Request` / `CCR` must be treated exactly as `Task` for all Rank 2 rules.
+`Custom Request`, `Property`, and `CCR` work must be treated exactly as `Task` for all Rank 2 rules.
 
 1. Enhancements without epic or Enhancements/Tasks with epic (with all Enhancements/Tasks of same epic grouped together)
-2. Tasks without epic, including normalized `Custom Request` / `CCR` issues
+2. Tasks without epic, including normalized `Custom Request`, `Property`, and `CCR` issues
 
 ---
 
