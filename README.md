@@ -15,9 +15,10 @@ The tool:
 
 The final order is:
 
-1. Rank 1: client production bugs and vulnerabilities
+1. Rank 1: critical/high client production bugs and vulnerabilities
 2. Rank 2: enhancements and tasks, with epic-linked work grouped together
-3. Rank 3: internal bugs
+3. Rank 2.5: medium/low client production bugs and vulnerabilities
+4. Rank 3: internal bugs
 
 Within each bucket, ordering is deterministic. The tool also minimizes Jira move operations by keeping the longest already-correct subsequence in place.
 

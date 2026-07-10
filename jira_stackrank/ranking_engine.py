@@ -14,6 +14,7 @@ class RankingError(Exception):
 class RankBucket(str, Enum):
     RANK_1 = "Rank 1"
     RANK_2 = "Rank 2"
+    RANK_2_5 = "Rank 2.5"
     RANK_3 = "Rank 3"
 
 
@@ -52,12 +53,13 @@ class RankedIssue:
 def compute_ranked_order(issues: list[IssueRecord], settings: Settings) -> list[RankedIssue]:
     annotated = [(issue, _bucket_for(issue)) for issue in issues]
 
-    # Each band is sorted independently, then concatenated to match the PRD's
-    # fixed Rank 1 -> Rank 2 -> Rank 3 precedence.
+    # Each band is sorted independently, then concatenated to match the fixed
+    # PRD precedence.
     rank_groups = _partition_by_bucket(annotated)
     final = (
         _sort_by_priority_then_stable(rank_groups[RankBucket.RANK_1])
         + _sort_rank_2(rank_groups[RankBucket.RANK_2])
+        + _sort_by_priority_then_stable(rank_groups[RankBucket.RANK_2_5])
         + _sort_by_priority_then_stable(rank_groups[RankBucket.RANK_3])
     )
     positions = {issue.key: index + 1 for index, issue in enumerate(final)}
@@ -91,6 +93,8 @@ def _bucket_for(issue: IssueRecord) -> RankBucket:
 
     if issue_type == "bug":
         if raw_issue_type == "vulnerability" or issue.is_client_bug:
+            if _is_deferred_client_bug_priority(issue.priority_name):
+                return RankBucket.RANK_2_5
             return RankBucket.RANK_1
         return RankBucket.RANK_3
 
@@ -103,6 +107,7 @@ def _partition_by_bucket(
     grouped: dict[RankBucket, list[IssueRecord]] = {
         RankBucket.RANK_1: [],
         RankBucket.RANK_2: [],
+        RankBucket.RANK_2_5: [],
         RankBucket.RANK_3: [],
     }
     for issue, bucket in annotated:
@@ -187,13 +192,17 @@ def _canonical_issue_type(issue_type: str | None) -> str:
     return aliases.get(normalized, normalized)
 
 
+def _is_deferred_client_bug_priority(priority_name: str | None) -> bool:
+    return _normalize(priority_name) in {"medium", "low", "lowest"}
+
+
 def _kind_label(issue: IssueRecord, bucket: RankBucket, settings: Settings) -> str | None:
     issue_type = _canonical_issue_type(issue.issue_type)
     if issue_type in {"task", "enhancement"}:
         return _epic_title_prefix(issue.epic_summary, settings.epic_title_prefix_length)
     if issue_type != "bug":
         return None
-    if bucket == RankBucket.RANK_1:
+    if bucket in {RankBucket.RANK_1, RankBucket.RANK_2_5}:
         return "Client Bug"
     return "Internal Bug"
 

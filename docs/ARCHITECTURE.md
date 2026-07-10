@@ -65,8 +65,9 @@ The tool follows a simple linear flow:
 
 This is the core ranking step:
 
-- Rank 1: client bugs and vulnerabilities
+- Rank 1: critical/high client bugs and vulnerabilities
 - Rank 2: enhancements and tasks, with epic-linked grouping
+- Rank 2.5: medium/low client bugs and vulnerabilities
 - Rank 3: internal bugs
 
 ### 4. Move Planning

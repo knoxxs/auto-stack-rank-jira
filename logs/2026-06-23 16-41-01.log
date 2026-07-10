@@ -1,0 +1,11 @@
+Writing run log to /Users/agupta2/workspace/auto-stack-rank-jira/logs/2026-06-23 16-41-01.log
+Using Jira base URL: https://ontichelp.atlassian.net
+Using board: IICM (1124, type=scrum)
+Selected sprint from --sprint: Sprint 120 (1334)
+Fetched 11 issues from board 1124 sprint 1334.
+Fetched issue type counts: BE Sub-task=1, Custom Request=1, Enhancements=2, Task=7
+Ignoring 1 sub-task issues.
+Ranking 10 non-sub-task issues.
+Moving CCR-272 after ONT-44171
+Moving ONT-42489 after CCR-272
+Applied 2 rank updates.

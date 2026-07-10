@@ -1,0 +1,13 @@
+Writing run log to /Users/agupta2/workspace/personal/auto-stack-rank-jira/logs/2026-07-07 17-02-47.log
+Using Jira base URL: https://ontichelp.atlassian.net
+Using board: IICM (1124, type=scrum)
+Selected sprint from --sprint: Sprint 120 (1334)
+Fetched 76 issues from board 1124 sprint 1334.
+Fetched issue type counts: BE Sub-task=21, Bug=4, Bug Sub-task=12, Custom Request=1, Enhancements=10, FE Sub-task=6, QA Sub-task=2, Task=18, Vulnerability=2
+Ignoring 41 sub-task issues.
+Ranking 35 non-sub-task issues.
+Moving ONT-45331 after ONT-44389
+Moving ONT-45333 after ONT-45331
+Moving SECOP-443 after ONT-42489
+Moving SECOP-447 after ONT-44814
+Applied 4 rank updates.
