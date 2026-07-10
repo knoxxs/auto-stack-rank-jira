@@ -51,6 +51,16 @@ class RankedIssue:
 
 
 def compute_ranked_order(issues: list[IssueRecord], settings: Settings) -> list[RankedIssue]:
+    """
+    Rank issues according to the configured PRD precedence and return their ranking metadata.
+    
+    Parameters:
+        issues (list[IssueRecord]): Issues to classify and rank.
+        settings (Settings): Settings used to derive issue kind labels.
+    
+    Returns:
+        list[RankedIssue]: Ranked issue records in the original input order, with current and new positions, rank buckets, and derived kind labels.
+    """
     annotated = [(issue, _bucket_for(issue)) for issue in issues]
 
     # Each band is sorted independently, then concatenated to match the fixed
@@ -82,6 +92,18 @@ def compute_ranked_order(issues: list[IssueRecord], settings: Settings) -> list[
 
 
 def _bucket_for(issue: IssueRecord) -> RankBucket:
+    """
+    Assign the issue to its PRD-defined ranking bucket.
+    
+    Parameters:
+    	issue (IssueRecord): Issue whose type, client-bug status, and priority determine the bucket.
+    
+    Returns:
+    	RankBucket: The issue's assigned ranking bucket.
+    
+    Raises:
+    	RankingError: If the issue type is not supported by the PRD.
+    """
     raw_issue_type = _normalize(issue.issue_type)
     issue_type = _canonical_issue_type(issue.issue_type)
 
@@ -104,6 +126,14 @@ def _bucket_for(issue: IssueRecord) -> RankBucket:
 def _partition_by_bucket(
     annotated: list[tuple[IssueRecord, RankBucket]]
 ) -> dict[RankBucket, list[IssueRecord]]:
+    """Group issues by their assigned rank bucket.
+    
+    Parameters:
+    	annotated (list[tuple[IssueRecord, RankBucket]]): Issues paired with their rank buckets.
+    
+    Returns:
+    	dict[RankBucket, list[IssueRecord]]: A mapping containing each rank bucket and its associated issues.
+    """
     grouped: dict[RankBucket, list[IssueRecord]] = {
         RankBucket.RANK_1: [],
         RankBucket.RANK_2: [],
@@ -182,6 +212,14 @@ def _normalize(value: str | None) -> str:
 
 
 def _canonical_issue_type(issue_type: str | None) -> str:
+    """Return the canonical form of an issue type, applying supported aliases.
+    
+    Parameters:
+    	issue_type (str | None): The issue type to normalize and canonicalize.
+    
+    Returns:
+    	str: The normalized issue type or its canonical alias.
+    """
     normalized = _normalize(issue_type)
     aliases = {
         "custom request": "task",
@@ -193,10 +231,30 @@ def _canonical_issue_type(issue_type: str | None) -> str:
 
 
 def _is_deferred_client_bug_priority(priority_name: str | None) -> bool:
+    """
+    Determines whether a priority qualifies for deferred client-bug ranking.
+    
+    Parameters:
+        priority_name (str | None): The issue priority name.
+    
+    Returns:
+        bool: `true` if the priority is medium, low, or lowest, `false` otherwise.
+    """
     return _normalize(priority_name) in {"medium", "low", "lowest"}
 
 
 def _kind_label(issue: IssueRecord, bucket: RankBucket, settings: Settings) -> str | None:
+    """
+    Classify an issue for output labeling based on its type, rank bucket, and epic context.
+    
+    Parameters:
+    	issue (IssueRecord): Issue whose label should be determined.
+    	bucket (RankBucket): Rank bucket assigned to the issue.
+    	settings (Settings): Settings containing the epic title prefix length.
+    
+    Returns:
+    	str | None: The epic title prefix for tasks and enhancements, `"Client Bug"` or `"Internal Bug"` for bugs, or `None` for unsupported issue types.
+    """
     issue_type = _canonical_issue_type(issue.issue_type)
     if issue_type in {"task", "enhancement"}:
         return _epic_title_prefix(issue.epic_summary, settings.epic_title_prefix_length)

@@ -28,6 +28,22 @@ def issue(
     priority_name: str | None = None,
     is_client_bug: bool = False,
 ) -> IssueRecord:
+    """
+    Create an IssueRecord test fixture with the specified ranking and epic metadata.
+    
+    Parameters:
+        key (str): Issue identifier and summary.
+        issue_type (str): Issue type.
+        original_index (int): Original position before ranking.
+        priority_rank (int): Numeric priority rank.
+        epic_key (str | None): Associated epic identifier, if any.
+        epic_summary (str | None): Associated epic summary, if any.
+        priority_name (str | None): Priority name; defaults to a name derived from priority_rank.
+        is_client_bug (bool): Whether the issue is classified as a client bug.
+    
+    Returns:
+        IssueRecord: An initialized issue record with default test state.
+    """
     return IssueRecord(
         key=key,
         issue_type=issue_type,
