@@ -190,6 +190,7 @@ Final global order:
 ```
 Rank 1
 → Rank 2
+→ Rank 2.5
 → Rank 3
 ```
 
@@ -199,7 +200,7 @@ Stable ordering preserved for ties.
 
 ---
 
-## Rank 1 – Client Production Bugs
+## Rank 1 – Critical/High Client Production Bugs
 
 Criteria:
 
@@ -207,6 +208,7 @@ Criteria:
 * `Pod = pod-iicm`
 * `Found in Environment = Production`
 * `Client - SFDC != Ontic Technologies || 0011U00001I3ol4QAB`
+* Priority is not `Medium`, `Low`, or `Lowest`
 
 Sorting:
 
@@ -252,11 +254,24 @@ Sort by:
 
 ---
 
+## Rank 2.5 – Medium/Low Client Production Bugs
+
+Definition:
+
+Client production bug-like issues from the Rank 1 criteria whose priority is `Medium`, `Low`, or `Lowest`.
+
+Sort by:
+
+1. Priority
+2. Stable order
+
+---
+
 ## Rank 3 – Internal Bugs
 
 Definition:
 
-All remaining `type = Bug` not in Rank 1.
+All remaining `type = Bug` not in Rank 1 or Rank 2.5.
 
 Sort by:
 
@@ -270,7 +285,7 @@ Sort by:
 1. Fetch issues in current board order
 2. Assign original index
 3. Determine rank bucket
-4. Partition into Rank 1, Rank 2, Rank 3
+4. Partition into Rank 1, Rank 2, Rank 2.5, Rank 3
 5. Apply sorting rules
 6. Concatenate buckets
 7. Produce final ordered list
@@ -331,7 +346,7 @@ Console table:
 Column definitions:
 
 * `Bug Kind` is populated only for `Bug` and `Vulnerability`
-* `Bug Kind = Client Bug` for Rank 1 bug-like issues
+* `Bug Kind = Client Bug` for Rank 1 and Rank 2.5 bug-like issues
 * `Bug Kind = Internal Bug` for Rank 3 bug-like issues
 * `Title` should show the issue summary in truncated form for console readability
 * `Current Rank Value` is the current Jira rank field value from the fetched issue data
